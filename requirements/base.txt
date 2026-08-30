@@ -7,6 +7,7 @@ django-environ
 psycopg[binary]
 qrcode[pil]
 requests
+openpyxl
 whitenoise
 django-htmx
 gunicorn
