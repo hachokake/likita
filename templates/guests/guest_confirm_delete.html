@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block title %}Supprimer | Likita{% endblock %}
+
+{% block content %}
+<section class="mx-auto max-w-xl">
+    <div class="glass-card p-8">
+        <h1 class="text-3xl font-semibold">Supprimer {{ object.full_name }} ?</h1>
+        <p class="mt-4 text-white/60">Cette action supprimera aussi les donnees liees a l'invitation, au RSVP et au QR code.</p>
+        <form method="post" class="mt-8 flex gap-3">
+            {% csrf_token %}
+            <button type="submit" class="btn-primary">Confirmer</button>
+            <a href="{% url 'guests:detail' object.pk %}" class="btn-secondary">Annuler</a>
+        </form>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ event.name }} | Likita{% endblock %}
+
+{% block content %}
+<section class="space-y-8">
+    <div class="glass-card overflow-hidden">
+        <div class="relative h-72 bg-gradient-to-br from-neutral-950 via-neutral-900 to-rose-950 px-8 py-10">
+            <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(229,56,59,0.22),transparent_22%)]"></div>
+            <div class="relative flex h-full flex-col justify-between">
+                <div class="flex justify-between gap-4">
+                    <div>
+                        <p class="text-sm uppercase tracking-[0.3em] text-white/45">{{ event.get_event_type_display }}</p>
+                        <h1 class="mt-3 text-5xl font-semibold">{{ event.name }}</h1>
+                        <p class="mt-4 max-w-2xl text-white/65">{{ event.description }}</p>
+                    </div>
+                    <span class="rounded-full border border-white/10 bg-white/6 px-4 py-2 text-sm">{{ event.get_status_display }}</span>
+                </div>
+                <div class="flex flex-wrap gap-3">
+                    <a href="{% url 'events:edit' event.slug %}" class="btn-secondary">Modifier</a>
+                    <form method="post" action="{% url 'events:publish' event.slug %}">{% csrf_token %}<button class="btn-primary">Publier</button></form>
+                    <form method="post" action="{% url 'events:archive' event.slug %}">{% csrf_token %}<button class="btn-secondary">Archiver</button></form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
+        <div class="space-y-6">
+            <div class="glass-card p-6">
+                <h2 class="text-2xl font-semibold">Informations clefs</h2>
+                <div class="mt-6 grid gap-4 sm:grid-cols-2 text-sm text-white/60">
+                    <p>Date: {{ event.event_date }}</p>
+                    <p>Heure: {{ event.event_time }}</p>
+                    <p>Adresse: {{ event.address }}</p>
+                    <p>Tenue vestimentaire: {{ event.dress_code|default:'Libre' }}</p>
+                    <p>Date limite RSVP: {{ event.rsvp_deadline|default:'Non definie' }}</p>
+                    <p>Capacite: {{ event.max_guests }}</p>
+                </div>
+                <p class="mt-6 text-white/65">{{ event.detailed_program|linebreaksbr }}</p>
+            </div>
+            <div class="glass-card p-6">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-2xl font-semibold">Programme</h2>
+                    <a href="{% url 'guests:list' %}" class="text-sm text-rose-300">Voir les invites</a>
+                </div>
+                <div class="mt-6 space-y-4">
+                    {% for item in event.program_items.all %}
+                        <div class="rounded-3xl border border-white/10 bg-white/5 p-4">
+                            <p class="text-sm text-white/40">{{ item.start_at }}</p>
+                            <h3 class="mt-2 text-xl font-semibold">{{ item.title }}</h3>
+                            <p class="mt-2 text-white/60">{{ item.description }}</p>
+                        </div>
+                    {% empty %}
+                        <p class="text-white/55">Ajoutez des jalons a cet evenement depuis l'administration ou un service dedie.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <div class="space-y-6">
+            <div class="glass-card p-6">
+                <h2 class="text-2xl font-semibold">Theme</h2>
+                <div class="mt-6 flex gap-3">
+                    <span class="h-14 w-14 rounded-2xl border border-white/10" style="background: {{ event.theme.primary_color }}"></span>
+                    <span class="h-14 w-14 rounded-2xl border border-white/10" style="background: {{ event.theme.secondary_color }}"></span>
+                    <span class="h-14 w-14 rounded-2xl border border-white/10" style="background: {{ event.theme.accent_color }}"></span>
+                </div>
+            </div>
+            <div class="glass-card p-6">
+                <h2 class="text-2xl font-semibold">Galerie</h2>
+                <div class="mt-6 grid gap-3 sm:grid-cols-2">
+                    {% for image in event.gallery_items.all %}
+                        <div class="rounded-3xl border border-white/10 bg-white/5 p-3 text-sm text-white/55">{{ image.caption|default:'Photo evenement' }}</div>
+                    {% empty %}
+                        <div class="rounded-3xl border border-dashed border-white/10 bg-white/3 p-8 text-sm text-white/55">Aucune image en galerie pour le moment.</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

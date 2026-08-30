@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block title %}Invite | Likita{% endblock %}
+
+{% block content %}
+<section class="mx-auto max-w-4xl">
+    <div class="glass-card p-8 sm:p-10">
+        <h1 class="text-4xl font-semibold">{% if form.instance.pk %}Modifier{% else %}Ajouter{% endif %} un invite</h1>
+        <form method="post" class="mt-8 grid gap-5 sm:grid-cols-2">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="space-y-2 {% if field.name == 'notes' %}sm:col-span-2{% endif %}">
+                    <label class="text-sm text-white/60">{{ field.label }}</label>
+                    {{ field }}
+                    {{ field.errors }}
+                </div>
+            {% endfor %}
+            <button type="submit" class="btn-primary sm:col-span-2">Enregistrer l'invite</button>
+        </form>
+    </div>
+</section>
+{% endblock %}

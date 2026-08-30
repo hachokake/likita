@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block title %}Evenement | Likita{% endblock %}
+
+{% block content %}
+<section class="mx-auto max-w-5xl">
+    <div class="glass-card p-8 sm:p-10">
+        <h1 class="text-4xl font-semibold">{% if form.instance.pk %}Modifier{% else %}Creer{% endif %} un evenement</h1>
+        <form method="post" enctype="multipart/form-data" class="mt-8 grid gap-5 sm:grid-cols-2">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="space-y-2 {% if field.name in 'description detailed_program welcome_message cover_image background_music' %}sm:col-span-2{% endif %}">
+                    <label class="text-sm text-white/60">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.help_text %}<p class="text-xs text-white/35">{{ field.help_text }}</p>{% endif %}
+                    {{ field.errors }}
+                </div>
+            {% endfor %}
+            <button type="submit" class="btn-primary sm:col-span-2">Enregistrer l'evenement</button>
+        </form>
+    </div>
+</section>
+{% endblock %}

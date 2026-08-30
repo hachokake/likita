@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% load core_extras %}
+
+{% block title %}Mapping import | Likita{% endblock %}
+
+{% block content %}
+<section class="space-y-8">
+    <div class="flex flex-wrap items-end justify-between gap-4">
+        <div>
+            <p class="text-xs uppercase tracking-[0.3em] text-white/40">Mapping de colonnes</p>
+            <h1 class="mt-2 text-4xl font-semibold">Associer les champs de {{ event_name }}</h1>
+            <p class="mt-3 text-white/60">Mode choisi: {{ import_mode }}</p>
+        </div>
+        <a href="{% url 'guests:import-upload' %}" class="btn-secondary">Changer de fichier</a>
+    </div>
+
+    <div class="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
+        <div class="glass-card p-8">
+            <form method="post" class="space-y-5">
+                {% csrf_token %}
+                {% for field in form %}
+                    <div class="space-y-2">
+                        <label class="text-sm text-white/60">{{ field.label }}</label>
+                        {{ field }}
+                        {{ field.errors }}
+                    </div>
+                {% endfor %}
+                <button type="submit" class="btn-primary w-full">Lancer l'import</button>
+            </form>
+        </div>
+        <div class="glass-card p-8">
+            <h2 class="text-2xl font-semibold">Apercu des donnees</h2>
+            <div class="mt-6 overflow-x-auto rounded-3xl border border-white/10">
+                <table class="min-w-full text-left text-sm">
+                    <thead class="bg-white/8 text-white/65">
+                        <tr>
+                            {% for header in headers %}
+                                <th class="px-4 py-3 font-medium">{{ header }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in preview_rows %}
+                            <tr class="border-t border-white/8 bg-black/10">
+                                {% for header in headers %}
+                                    <td class="px-4 py-3 text-white/60">{{ row|get_item:header }}</td>
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

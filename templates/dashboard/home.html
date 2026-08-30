@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block title %}Tableau de bord | Likita{% endblock %}
+
+{% block content %}
+<section class="space-y-8">
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+            <p class="text-xs uppercase tracking-[0.3em] text-white/40">Tableau de bord</p>
+            <h1 class="mt-2 text-3xl font-semibold sm:text-4xl">Pilotage de vos evenements</h1>
+        </div>
+        <div class="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
+            <a href="{% url 'events:create' %}" class="btn-primary w-full sm:w-auto">Creer un evenement</a>
+            <a href="{% url 'dashboard:statistics' %}" class="btn-secondary w-full sm:w-auto">Statistiques</a>
+        </div>
+    </div>
+
+    <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <div class="metric-card"><p class="text-sm text-white/45">Evenements</p><p class="mt-3 text-4xl font-semibold">{{ stats.events }}</p></div>
+        <div class="metric-card"><p class="text-sm text-white/45">Invites</p><p class="mt-3 text-4xl font-semibold">{{ stats.guests }}</p></div>
+        <div class="metric-card"><p class="text-sm text-white/45">Presents</p><p class="mt-3 text-4xl font-semibold">{{ stats.present }}</p></div>
+        <div class="metric-card"><p class="text-sm text-white/45">QR utilises</p><p class="mt-3 text-4xl font-semibold">{{ stats.scanned }}</p></div>
+    </div>
+
+    <div class="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+        <div class="glass-card p-6">
+            <div class="flex items-center justify-between">
+                <h2 class="text-2xl font-semibold">Pipeline des evenements</h2>
+                <span class="text-sm text-white/45">Top 5</span>
+            </div>
+            <div class="mt-6 space-y-4">
+                {% for event in event_breakdown %}
+                    <div>
+                        <div class="mb-2 flex justify-between text-sm text-white/60">
+                            <span>{{ event.name }}</span>
+                            <span>{{ event.total_guests }} invites</span>
+                        </div>
+                        <div class="h-3 rounded-full bg-white/8">
+                            <div class="h-3 rounded-full bg-gradient-to-r from-rose-700 to-red-400" style="width: {% widthratio event.total_guests 200 100 %}%"></div>
+                        </div>
+                    </div>
+                {% empty %}
+                    <p class="text-white/55">Aucun evenement pour le moment.</p>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="glass-card p-6">
+            <h2 class="text-2xl font-semibold">Repartition des invites</h2>
+            <div class="mt-6 space-y-4">
+                {% for item in guest_mix %}
+                    <div class="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+                        <span class="capitalize">{{ item.category }}</span>
+                        <span class="font-semibold">{{ item.total }}</span>
+                    </div>
+                {% empty %}
+                    <p class="text-white/55">Ajoutez des invites pour afficher vos segments.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block title %}Parametres | Likita{% endblock %}
+
+{% block content %}
+<section class="glass-card p-8">
+    <p class="text-xs uppercase tracking-[0.3em] text-white/40">Parametres utilisateur</p>
+    <h1 class="mt-3 text-3xl font-semibold">Configuration de l'espace</h1>
+    <div class="mt-8 grid gap-4 lg:grid-cols-3">
+        <div class="metric-card">
+            <p class="text-sm text-white/45">Langue</p>
+            <p class="mt-3 text-xl font-semibold">{{ request.user.settings.locale|default:'fr' }}</p>
+        </div>
+        <div class="metric-card">
+            <p class="text-sm text-white/45">Fuseau horaire</p>
+            <p class="mt-3 text-xl font-semibold">{{ request.user.settings.timezone|default:'Africa/Kinshasa' }}</p>
+        </div>
+        <div class="metric-card">
+            <p class="text-sm text-white/45">Alertes scan</p>
+            <p class="mt-3 text-xl font-semibold">{% if request.user.settings.scan_alerts %}Activees{% else %}Desactivees{% endif %}</p>
+        </div>
+    </div>
+</section>
+{% endblock %}

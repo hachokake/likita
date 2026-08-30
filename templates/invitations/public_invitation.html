@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+
+{% block title %}Invitation | {{ invitation.event.name }}{% endblock %}
+
+{% block content %}
+<section class="invitation-page space-y-8">
+    <article id="invitation-card" class="invitation-card invitation-card--full">
+        <div class="invitation-card__hero">
+            {% if invitation.event.cover_image %}
+                <img src="{{ invitation.event.cover_image.url }}" alt="{{ invitation.event.name }}" class="invitation-card__cover">
+            {% endif %}
+            <div class="invitation-card__overlay"></div>
+            <div class="invitation-card__hero-content">
+                <p class="invitation-card__tag">Invitation personnelle</p>
+                <p class="invitation-card__host">{{ invitation.event.host_names }}</p>
+                <h1>{{ invitation.event.name }}</h1>
+                <p class="invitation-card__welcome">{{ invitation.event.welcome_message|default:invitation.event.description }}</p>
+            </div>
+        </div>
+        <div class="invitation-card__body">
+            <p class="invitation-card__guest">Cher(e) {{ invitation.guest.full_name }}, vous etes cordialement invite(e).</p>
+            <dl class="invitation-details">
+                <div><dt>Date</dt><dd>{{ invitation.event.event_date|date:'l d F Y' }}</dd></div>
+                <div><dt>Heure</dt><dd>{{ invitation.event.event_time|time:'H:i' }}</dd></div>
+                <div><dt>Lieu</dt><dd>{{ invitation.event.address }}</dd></div>
+                <div><dt>Tenue</dt><dd>{{ invitation.event.dress_code|default:'Libre' }}</dd></div>
+            </dl>
+            {% if invitation.event.google_maps_url %}<a href="{{ invitation.event.google_maps_url }}" class="invitation-map" target="_blank" rel="noopener">Voir l'itineraire</a>{% endif %}
+        </div>
+    </article>
+
+    <div class="flex flex-wrap justify-center gap-3 print:hidden">
+        <button type="button" class="btn-secondary" onclick="window.print()">Telecharger ma carte</button>
+        <a href="#confirmation" class="btn-primary">Repondre a l'invitation</a>
+    </div>
+
+    <div class="grid gap-6 lg:grid-cols-[1.1fr_0.9fr] print:hidden">
+        <div class="glass-card p-6">
+            <h2 class="text-2xl font-semibold">Programme</h2>
+            <div class="mt-5 space-y-4">
+                {% for item in invitation.event.program_items.all %}
+                    <div class="border-l-2 border-rose-400/70 pl-4">
+                        <p class="text-sm text-white/45">{{ item.start_at|date:'H:i' }}</p>
+                        <h3 class="mt-1 text-lg font-semibold">{{ item.title }}</h3>
+                        {% if item.description %}<p class="mt-1 text-sm text-white/60">{{ item.description }}</p>{% endif %}
+                    </div>
+                {% empty %}
+                    <p class="text-white/60">{{ invitation.event.detailed_program|default:'Le programme detaille vous sera communique par les organisateurs.'|linebreaksbr }}</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div id="confirmation" class="glass-card p-6">
+            <p class="text-xs uppercase tracking-[0.2em] text-white/45">Confirmation</p>
+            <h2 class="mt-2 text-2xl font-semibold">Votre reponse</h2>
+            <form method="post" action="{% url 'rsvp:respond' invitation.token %}" class="mt-5 space-y-4">
+                {% csrf_token %}
+                <div>
+                    <label for="response" class="text-sm text-white/70">Serez-vous des notres ?</label>
+                    <select id="response" name="response" class="mt-1 w-full rounded-md border border-white/15 bg-black/20 px-3 py-3 text-white">
+                        <option value="accepted" {% if invitation.guest.rsvp.response == 'accepted' %}selected{% endif %}>Oui, je serai present(e)</option>
+                        <option value="declined" {% if invitation.guest.rsvp.response == 'declined' %}selected{% endif %}>Non, je ne pourrai pas venir</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="drink_preference" class="text-sm text-white/70">Votre boisson preferee</label>
+                    <select id="drink_preference" name="drink_preference" class="mt-1 w-full rounded-md border border-white/15 bg-black/20 px-3 py-3 text-white">
+                        <option value="">Aucune preference</option><option value="Eau">Eau</option><option value="Jus">Jus de fruits</option><option value="Soda">Soda</option><option value="Vin">Vin</option><option value="Biere">Biere</option><option value="Cocktail sans alcool">Cocktail sans alcool</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="companion_count" class="text-sm text-white/70">Nombre d'accompagnants</label>
+                    <input id="companion_count" type="number" name="companion_count" min="0" value="{{ invitation.guest.rsvp.companion_count }}" class="mt-1 w-full rounded-md border border-white/15 bg-black/20 px-3 py-3 text-white">
+                </div>
+                <div>
+                    <label for="guest_message" class="text-sm text-white/70">Message aux organisateurs</label>
+                    <textarea id="guest_message" name="guest_message" rows="3" class="mt-1 w-full rounded-md border border-white/15 bg-black/20 px-3 py-3 text-white">{{ invitation.guest.rsvp.guest_message }}</textarea>
+                </div>
+                <button type="submit" class="btn-primary w-full">Enregistrer ma reponse</button>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}

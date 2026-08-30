@@ -1,0 +1,5 @@
+<nav class="glass-card flex flex-wrap gap-3 p-4">
+    <a href="{% url 'adminpanel:dashboard' %}" class="{% if admin_tab == 'dashboard' %}btn-primary{% else %}nav-chip{% endif %}">Vue d'ensemble</a>
+    <a href="{% url 'adminpanel:users' %}" class="{% if admin_tab == 'users' %}btn-primary{% else %}nav-chip{% endif %}">Utilisateurs</a>
+    <a href="{% url 'adminpanel:events' %}" class="{% if admin_tab == 'events' %}btn-primary{% else %}nav-chip{% endif %}">Evenements</a>
+</nav>

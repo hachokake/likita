@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %}Evenements | Likita{% endblock %}
+
+{% block content %}
+<section class="space-y-8">
+    <div class="flex flex-wrap items-end justify-between gap-4">
+        <div>
+            <p class="text-xs uppercase tracking-[0.3em] text-white/40">Espace utilisateur</p>
+            <h1 class="mt-2 text-4xl font-semibold">Tous vos evenements</h1>
+        </div>
+        <a href="{% url 'events:create' %}" class="btn-primary">Nouvel evenement</a>
+    </div>
+    <div class="grid gap-5 lg:grid-cols-2">
+        {% for event in events %}
+            <article class="glass-card p-6">
+                <div class="flex items-start justify-between gap-4">
+                    <div>
+                        <p class="text-sm text-white/45">{{ event.get_event_type_display }}</p>
+                        <h2 class="mt-2 text-2xl font-semibold">{{ event.name }}</h2>
+                    </div>
+                    <span class="rounded-full border border-white/10 px-3 py-1 text-xs text-white/55">{{ event.get_status_display }}</span>
+                </div>
+                <p class="mt-4 text-white/60">{{ event.description|default:'Sans description pour le moment.'|truncatechars:160 }}</p>
+                <div class="mt-6 flex items-center justify-between text-sm text-white/45">
+                    <span>{{ event.event_date }} · {{ event.event_time }}</span>
+                    <span>{{ event.guest_count }} invites</span>
+                </div>
+                <div class="mt-6 flex gap-3">
+                    <a href="{% url 'events:detail' event.slug %}" class="btn-primary">Ouvrir</a>
+                    <a href="{% url 'events:edit' event.slug %}" class="btn-secondary">Modifier</a>
+                </div>
+            </article>
+        {% empty %}
+            <div class="glass-card p-8 text-white/55">Vous n'avez encore cree aucun evenement.</div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

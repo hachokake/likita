@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block title %}Statistiques | Likita{% endblock %}
+
+{% block content %}
+<section class="space-y-8">
+    <div>
+        <p class="text-xs uppercase tracking-[0.3em] text-white/40">Statistiques</p>
+        <h1 class="mt-2 text-4xl font-semibold">Vue analytique</h1>
+    </div>
+    <div class="grid gap-6 lg:grid-cols-[1fr_1fr]">
+        <div class="glass-card p-6">
+            <h2 class="text-2xl font-semibold">Performance par evenement</h2>
+            <div class="mt-6 space-y-4">
+                {% for event in events %}
+                    <div class="rounded-3xl border border-white/10 bg-white/5 p-4">
+                        <div class="flex items-center justify-between">
+                            <span>{{ event.name }}</span>
+                            <span class="text-white/45">{{ event.get_status_display }}</span>
+                        </div>
+                        <p class="mt-2 text-sm text-white/55">{{ event.total_guests }} invites</p>
+                    </div>
+                {% empty %}
+                    <p class="text-white/55">Aucune statistique disponible.</p>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="glass-card p-6">
+            <h2 class="text-2xl font-semibold">Historique des scans</h2>
+            <div class="mt-6 space-y-4">
+                {% for scan in scans %}
+                    <div class="rounded-3xl border border-white/10 bg-white/5 p-4">
+                        <p class="font-semibold">{{ scan.guest.full_name|default:'Inconnu' }}</p>
+                        <p class="mt-1 text-sm text-white/55">{{ scan.event.name }} · {{ scan.get_status_display }} · {{ scan.scanned_at }}</p>
+                    </div>
+                {% empty %}
+                    <p class="text-white/55">Aucun scan enregistre.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

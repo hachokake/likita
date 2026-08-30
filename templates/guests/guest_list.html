@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+
+{% block title %}Invites | Likita{% endblock %}
+
+{% block content %}
+<section class="space-y-8">
+    <div class="flex flex-wrap items-end justify-between gap-4">
+        <div>
+            <p class="text-xs uppercase tracking-[0.3em] text-white/40">Gestion des invites</p>
+            <h1 class="mt-2 text-4xl font-semibold">Carnet d'invites</h1>
+            <p class="mt-3 max-w-2xl text-white/60">Centralisez vos listes VIP, familles et groupes avec import massif, tri instantane et envoi WhatsApp Business.</p>
+        </div>
+        <div class="flex flex-wrap gap-3">
+            <a href="{% url 'guests:import-upload' %}" class="btn-secondary">Importer CSV / Excel</a>
+            <a href="{% url 'guests:create' %}" class="btn-primary">Ajouter un invite</a>
+        </div>
+    </div>
+    <div class="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
+        <form method="get" class="glass-card flex flex-col gap-3 p-4 sm:flex-row">
+            <input type="search" name="q" value="{{ request.GET.q }}" placeholder="Rechercher un nom, telephone ou categorie" class="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/35 focus:border-rose-500 focus:outline-none">
+            <button class="btn-secondary">Rechercher</button>
+        </form>
+        <div class="glass-card grid grid-cols-3 gap-3 p-4 text-center">
+            <div>
+                <p class="text-xs uppercase tracking-[0.25em] text-white/35">Total</p>
+                <p class="mt-2 text-3xl font-semibold">{{ page_obj.paginator.count }}</p>
+            </div>
+            <div>
+                <p class="text-xs uppercase tracking-[0.25em] text-white/35">Page</p>
+                <p class="mt-2 text-3xl font-semibold">{{ page_obj.number }}</p>
+            </div>
+            <div>
+                <p class="text-xs uppercase tracking-[0.25em] text-white/35">Lot</p>
+                <p class="mt-2 text-3xl font-semibold">{{ guests|length }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="grid gap-4">
+        {% for guest in guests %}
+            <article class="glass-card overflow-hidden p-0">
+                <div class="grid gap-5 border-b border-white/8 bg-gradient-to-r from-white/6 to-transparent p-5 lg:grid-cols-[1.25fr_0.75fr] lg:items-center">
+                    <div>
+                        <div class="flex flex-wrap items-center gap-3">
+                            <span class="rounded-full border border-white/10 px-3 py-1 text-xs text-white/55">{{ guest.get_category_display }}</span>
+                            <span class="rounded-full border border-white/10 px-3 py-1 text-xs text-white/55">{{ guest.get_status_display }}</span>
+                        </div>
+                        <h2 class="mt-4 text-2xl font-semibold">{{ guest.full_name }}</h2>
+                        <p class="mt-2 text-white/60">{{ guest.whatsapp_number }} · {{ guest.event.name }}</p>
+                        <p class="mt-1 text-sm text-white/45">Table {{ guest.reserved_table|default:'Non attribuee' }} · {{ guest.allowed_companions }} accompagnant(s)</p>
+                    </div>
+                    <div class="grid gap-3 sm:grid-cols-2">
+                        <div class="rounded-3xl border border-white/10 bg-black/20 p-4">
+                            <p class="text-xs uppercase tracking-[0.25em] text-white/35">Invitation</p>
+                            <p class="mt-2 text-lg font-semibold">{{ guest.invitation.get_delivery_status_display }}</p>
+                        </div>
+                        <div class="rounded-3xl border border-white/10 bg-black/20 p-4">
+                            <p class="text-xs uppercase tracking-[0.25em] text-white/35">RSVP</p>
+                            <p class="mt-2 text-lg font-semibold">{{ guest.rsvp.get_response_display }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex flex-wrap items-center justify-between gap-3 p-5">
+                    <p class="text-sm text-white/45">QR scans: {{ guest.qrcode.scan_count|default:0 }}</p>
+                    <div class="flex flex-wrap items-center gap-3">
+                        {% if guest.invitation %}<a href="{% url 'invitations:send' guest.invitation.token %}" class="btn-secondary">Envoyer via WhatsApp</a>{% endif %}
+                        <a href="{% url 'guests:detail' guest.pk %}" class="btn-primary">Details</a>
+                    </div>
+                </div>
+            </article>
+        {% empty %}
+            <div class="glass-card p-8 text-white/55">Aucun invite ajoute pour le moment.</div>
+        {% endfor %}
+    </div>
+    {% if is_paginated %}
+        <div class="flex items-center justify-between pt-4 text-sm text-white/55">
+            <span>Page {{ page_obj.number }} sur {{ page_obj.paginator.num_pages }}</span>
+            <div class="flex gap-3">
+                {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="btn-secondary">Precedent</a>{% endif %}
+                {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="btn-secondary">Suivant</a>{% endif %}
+            </div>
+        </div>
+    {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,688 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}{{ APP_NAME }}{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/app.css' %}">
+    <style>
+        .cs_site_header {
+            background: transparent !important;
+        }
+
+        .cs_site_header,
+        .cs_site_header .glass-card,
+        .cs_site_header .nav-chip,
+        .cs_site_header .btn-primary,
+        .cs_site_header .btn-secondary,
+        .cs_site_header button {
+            border: none !important;
+            outline: none;
+            box-shadow: none;
+            background: transparent !important;
+            backdrop-filter: none !important;
+        }
+
+        .cs_site_header .nav-chip:hover,
+        .cs_site_header .btn-primary:hover,
+        .cs_site_header .btn-secondary:hover,
+        .cs_site_header button:hover {
+            background: transparent !important;
+        }
+
+        .brand-logo-image--nav {
+            height: 120px !important;
+            width: 120px !important;
+        }
+
+        .nav-launch-cta {
+            border: 1px solid rgba(251, 113, 133, 0.45) !important;
+            background: transparent !important;
+            position: relative;
+            overflow: hidden;
+            transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1), background-color 220ms ease, border-color 220ms ease, box-shadow 220ms ease;
+        }
+
+        .nav-launch-cta::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(120deg, transparent 0%, rgba(255, 255, 255, 0.32) 45%, transparent 85%);
+            transform: translateX(-130%);
+            transition: transform 480ms ease;
+            pointer-events: none;
+        }
+
+        .nav-launch-cta:hover {
+            background: linear-gradient(135deg, rgba(225, 29, 72, 0.96), rgba(190, 18, 60, 0.95)) !important;
+            border-color: rgba(251, 113, 133, 0.95) !important;
+            box-shadow: 0 12px 28px rgba(225, 29, 72, 0.4);
+            transform: translateY(-2px) scale(1.035);
+        }
+
+        .nav-launch-cta:hover::before {
+            transform: translateX(130%);
+        }
+
+        .nav-launch-cta:active {
+            transform: translateY(0) scale(0.985);
+        }
+
+        .home-nav-link {
+            border: 1px solid rgba(255, 255, 255, 0.14) !important;
+            background: rgba(255, 255, 255, 0.04) !important;
+            color: rgba(255, 255, 255, 0.96);
+            border-radius: 999px;
+            padding: 0.62rem 1rem;
+            font-size: 0.92rem;
+            font-weight: 600;
+            line-height: 1;
+            letter-spacing: 0.01em;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1), border-color 220ms ease, box-shadow 220ms ease, background-color 220ms ease;
+        }
+
+        .home-nav-link:hover {
+            background: rgba(255, 255, 255, 0.11) !important;
+            border-color: rgba(251, 113, 133, 0.6) !important;
+            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.38), inset 0 0 0 1px rgba(251, 113, 133, 0.24);
+            transform: translateY(-2px);
+        }
+
+        .service-dropdown-panel {
+            margin-top: 0.7rem;
+            width: 18rem;
+            padding: 0.65rem;
+            border-radius: 1.1rem;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            background: linear-gradient(155deg, rgba(17, 24, 39, 0.96), rgba(51, 13, 20, 0.92));
+            box-shadow: 0 22px 42px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+        }
+
+        .service-dropdown-link {
+            display: block;
+            border-radius: 0.8rem;
+            padding: 0.72rem 0.88rem;
+            color: rgba(255, 255, 255, 0.95);
+            text-decoration: none;
+            font-weight: 600;
+            transition: transform 180ms ease, background-color 180ms ease, color 180ms ease;
+        }
+
+        .service-dropdown-link small {
+            display: block;
+            margin-top: 0.24rem;
+            color: rgba(255, 255, 255, 0.58);
+            font-size: 0.74rem;
+            font-weight: 500;
+            letter-spacing: 0.01em;
+        }
+
+        .service-dropdown-link:hover {
+            background: rgba(244, 63, 94, 0.2) !important;
+            color: #fff;
+            transform: translateX(2px);
+        }
+
+        .home-mobile-link {
+            border: 1px solid rgba(255, 255, 255, 0.14) !important;
+            background: rgba(255, 255, 255, 0.06) !important;
+            border-radius: 0.85rem;
+            padding: 0.74rem 1rem;
+            font-weight: 600;
+            transition: transform 180ms ease, background-color 180ms ease, border-color 180ms ease;
+        }
+
+        .home-mobile-link:hover {
+            background: rgba(255, 255, 255, 0.12) !important;
+            border-color: rgba(251, 113, 133, 0.58) !important;
+            transform: translateY(-1px);
+        }
+
+        .service-chevron {
+            transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+            transform-origin: 50% 45%;
+        }
+
+        .service-chevron.is-open {
+            transform: rotate(180deg);
+        }
+
+        .app-splash {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #050505;
+            opacity: 1;
+            visibility: visible;
+            transition: opacity 650ms ease, visibility 650ms ease;
+        }
+
+        .app-splash.is-hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .app-splash__inner {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .app-splash__logo {
+            width: 200px;
+            height: 200px;
+            object-fit: contain;
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            animation: logoBeat 1s ease-in-out infinite;
+        }
+
+        @media (min-width: 768px) {
+            .app-splash__logo {
+                width: 162px;
+                height: 162px;
+            }
+        }
+
+        @keyframes logoBeat {
+            0%,
+            100% {
+                transform: scale(1);
+                filter: drop-shadow(0 0 0 rgba(255, 255, 255, 0));
+            }
+            30% {
+                transform: scale(1.1);
+                filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.18));
+            }
+            55% {
+                transform: scale(0.96);
+            }
+        }
+
+        .site-footer {
+            position: relative;
+            z-index: 10;
+            margin-top: 2.5rem;
+            padding-bottom: 2rem;
+        }
+
+        .site-footer__shell {
+            border-radius: 1.4rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: linear-gradient(140deg, rgba(255, 255, 255, 0.06) 0%, rgba(8, 8, 14, 0.55) 58%, rgba(115, 22, 38, 0.4) 100%);
+            box-shadow: 0 16px 44px rgba(0, 0, 0, 0.35);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .site-footer__shell::before,
+        .site-footer__shell::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.55) 45%, rgba(255, 255, 255, 0.2) 55%, transparent 100%);
+            background-size: 220% 100%;
+            animation: footerGlow 9s linear infinite;
+            pointer-events: none;
+        }
+
+        .site-footer__shell::before {
+            top: 0;
+        }
+
+        .site-footer__shell::after {
+            bottom: 0;
+            animation-direction: reverse;
+        }
+
+        @keyframes footerGlow {
+            0% {
+                background-position: 0% 50%;
+            }
+            100% {
+                background-position: 200% 50%;
+            }
+        }
+
+        .site-footer__top {
+            display: grid;
+            gap: 1.2rem;
+            padding: 1.4rem;
+        }
+
+        .site-footer__brand {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .site-footer__logo {
+            width: 48px;
+            height: 48px;
+            border-radius: 0.9rem;
+            object-fit: cover;
+            background: rgba(255, 255, 255, 0.08);
+            padding: 0.15rem;
+        }
+
+        .site-footer__title {
+            margin: 0;
+            font-size: 1.05rem;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        .site-footer__subtitle {
+            margin: 0.2rem 0 0;
+            color: rgba(255, 255, 255, 0.64);
+            font-size: 0.86rem;
+        }
+
+        .site-footer__socials {
+            display: flex;
+            gap: 0.55rem;
+            margin-top: 0.9rem;
+        }
+
+        .site-footer__social {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 999px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(255, 255, 255, 0.88);
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            transition: transform 180ms ease, background-color 180ms ease, color 180ms ease;
+            text-decoration: none;
+        }
+
+        .site-footer__social:hover {
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.16);
+            color: #fff;
+        }
+
+        .site-footer__social svg {
+            width: 1rem;
+            height: 1rem;
+        }
+
+        .site-footer__grid {
+            display: grid;
+            gap: 1.1rem;
+        }
+
+        .site-footer__col {
+            border-radius: 1rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            padding: 1rem;
+        }
+
+        .site-footer__head {
+            margin: 0 0 0.65rem;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: rgba(255, 255, 255, 0.58);
+        }
+
+        .site-footer__links {
+            display: grid;
+            gap: 0.45rem;
+        }
+
+        .site-footer__newsletter {
+            margin-top: 0.95rem;
+            border-radius: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: rgba(255, 255, 255, 0.04);
+            padding: 0.8rem;
+        }
+
+        .site-footer__newsletter p {
+            margin: 0;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.76);
+        }
+
+        .site-footer__newsletter-row {
+            margin-top: 0.55rem;
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .site-footer__newsletter-input {
+            flex: 1 1 170px;
+            min-width: 0;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            background: rgba(0, 0, 0, 0.22);
+            color: #fff;
+            padding: 0.55rem 0.82rem;
+            outline: none;
+        }
+
+        .site-footer__newsletter-input::placeholder {
+            color: rgba(255, 255, 255, 0.52);
+        }
+
+        .site-footer__newsletter-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            text-decoration: none;
+            font-weight: 600;
+            padding: 0.52rem 0.9rem;
+            transition: transform 180ms ease, background-color 180ms ease;
+        }
+
+        .site-footer__newsletter-btn:hover {
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .site-footer__links a {
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+            transition: color 180ms ease, transform 180ms ease;
+            display: inline-block;
+        }
+
+        .site-footer__links a:hover {
+            color: #ffffff;
+            transform: translateX(3px);
+        }
+
+        .site-footer__cta {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 999px;
+            padding: 0.65rem 1rem;
+            text-decoration: none;
+            color: #fff;
+            font-weight: 600;
+            background: linear-gradient(125deg, rgba(190, 24, 60, 0.9) 0%, rgba(122, 12, 36, 0.95) 100%);
+            transition: transform 200ms ease, filter 200ms ease;
+        }
+
+        .site-footer__cta:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.08);
+        }
+
+        .site-footer__meta {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 0.85rem 1.4rem 1rem;
+            color: rgba(255, 255, 255, 0.68);
+            font-size: 0.82rem;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 0.75rem;
+        }
+
+        @media (min-width: 768px) {
+            .site-footer__top {
+                padding: 1.7rem;
+            }
+
+            .site-footer__grid {
+                grid-template-columns: 1.35fr 1fr 1fr;
+            }
+        }
+    </style>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script defer src="{% static 'js/app.js' %}?v=20260826-1"></script>
+</head>
+<body x-data="{ mobileMenuOpen: false, sidebarOpen: false }" class="app-loading selection:bg-rose-700/50 selection:text-white">
+    <div class="app-splash" data-app-splash aria-hidden="true">
+        <div class="app-splash__inner">
+            <img src="{% static 'media/branding/logo1.svg' %}" alt="" class="app-splash__logo">
+        </div>
+    </div>
+
+    {% if request.user.is_authenticated %}
+    <button type="button" class="workspace-menu-trigger" @click="sidebarOpen = true" aria-label="Ouvrir le menu">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    </button>
+    <div class="workspace-backdrop" x-show="sidebarOpen" x-cloak @click="sidebarOpen = false"></div>
+    <aside class="workspace-sidebar" :class="sidebarOpen ? 'is-open' : ''" aria-label="Navigation de votre espace">
+        <div class="workspace-sidebar__top">
+            <a href="{% url 'dashboard:home' %}" class="workspace-sidebar__brand">
+                <img src="{% static 'media/branding/logo2.svg' %}" alt="Likita">
+                <span>Likita</span>
+            </a>
+            <button type="button" class="workspace-sidebar__close" @click="sidebarOpen = false" aria-label="Fermer le menu">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+            </button>
+        </div>
+        <p class="workspace-sidebar__label">Mon espace</p>
+        <nav class="workspace-sidebar__nav">
+            <a href="{% url 'dashboard:home' %}" class="workspace-sidebar__link"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></svg><span>Tableau de bord</span></a>
+            <a href="{% url 'events:list' %}" class="workspace-sidebar__link"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3v4m8-4v4M4 10h16"/></svg><span>Événements</span></a>
+            <a href="{% url 'guests:list' %}" class="workspace-sidebar__link"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0m2-9a3 3 0 0 0 0-6m1.5 15a5.5 5.5 0 0 0-2.5-4.6"/></svg><span>Invités</span></a>
+            <a href="{% url 'scanner:home' %}" class="workspace-sidebar__link"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V5h4m8 0h4v4M20 15v4h-4M8 19H4v-4M8 9h8v6H8z"/></svg><span>Scanner</span></a>
+            <a href="{% url 'notifications:list' %}" class="workspace-sidebar__link"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 10a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M9.5 21h5"/></svg><span>Notifications</span></a>
+            {% if request.user.is_staff or request.user.is_superuser %}
+                <a href="{% url 'adminpanel:dashboard' %}" class="workspace-sidebar__link"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 4 7v5c0 5 3.4 8 8 9 4.6-1 8-4 8-9V7l-8-4Z"/><path d="M9 12h6m-3-3v6"/></svg><span>Administration</span></a>
+            {% endif %}
+        </nav>
+        <div class="workspace-sidebar__profile">
+            <a href="{% url 'accounts:profile' %}" class="workspace-profile-link">
+                <span class="workspace-profile-link__avatar">{{ request.user.first_name|default:request.user.email|first|upper }}</span>
+                <span><strong>{{ request.user.get_full_name|default:request.user.email }}</strong><small>Voir mon profil</small></span>
+            </a>
+            <form method="post" action="{% url 'accounts:logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="workspace-signout">Déconnexion</button>
+            </form>
+        </div>
+    </aside>
+    {% elif not request.resolver_match or request.resolver_match.view_name != 'accounts:login' and request.resolver_match.view_name != 'accounts:signup' %}
+    <header class="cs_site_header cs_style_1 cs_sticky_header cs_primary_color section-shell relative z-10 py-6" x-data="{ mobileMenuOpen: false, serviceMenuOpen: false, mobileServiceOpen: false }" style="border: none !important;">
+    <div class="glass-card px-4 py-4 sm:px-6" style="border: none !important;">
+        <div class="relative flex items-center justify-between gap-3">
+            <!-- Logo et Titre -->
+            <div class="flex items-center gap-3">
+                <a href="{% url 'core:home' %}" class="flex items-center gap-3">
+                    <img src="{% static 'media/branding/logo2.svg' %}" alt="Likita" class="brand-logo-image brand-logo-image--nav">
+                </a>
+            </div>
+
+            {% if request.resolver_match and request.resolver_match.url_name == 'home' %}
+                <a href="{% url 'accounts:signup' %}" class="nav-launch-cta absolute right-4 top-1/2 z-30 hidden -translate-y-1/2 items-center rounded-xl px-4 py-2 text-sm font-semibold text-white lg:inline-flex sm:right-6">
+                    C'est parti
+                </a>
+            {% endif %}
+
+            <!-- Navigation Desktop (Centrée corrigée) -->
+            <nav class="hidden items-center gap-3 lg:flex {% if request.resolver_match and request.resolver_match.url_name == 'home' %}lg:absolute lg:left-1/2 lg:top-1/2 lg:z-20 lg:-translate-x-1/2 lg:-translate-y-1/2{% endif %}">
+                {% if request.resolver_match and request.resolver_match.url_name == 'home' %}
+                    <a href="{% url 'core:home' %}" class="home-nav-link">Accueil</a>
+                    <div class="relative" @mouseenter="serviceMenuOpen = true" @mouseleave="serviceMenuOpen = false">
+                        <button type="button" class="home-nav-link inline-flex items-center gap-2" @click="serviceMenuOpen = !serviceMenuOpen" :aria-expanded="serviceMenuOpen.toString()" aria-haspopup="true">
+                            Service
+                            <svg xmlns="http://www.w3.org/2000/svg" class="service-chevron h-4 w-4" :class="serviceMenuOpen ? 'is-open' : ''" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                        <div x-show="serviceMenuOpen" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 -translate-y-2 scale-[0.98]" x-transition:enter-end="opacity-100 translate-y-0 scale-100" x-transition:leave="transition ease-in duration-140" x-transition:leave-start="opacity-100 translate-y-0 scale-100" x-transition:leave-end="opacity-0 -translate-y-1 scale-[0.98]" x-cloak class="service-dropdown-panel absolute left-0 top-full z-40 space-y-2">
+                            <a href="{% url 'core:home' %}#service-graphique-design" class="service-dropdown-link">
+                                Graphique design
+                                <small>Identite visuelle et direction artistique</small>
+                            </a>
+                            <a href="{% url 'core:home' %}#service-invitation" class="service-dropdown-link">
+                                Invitation
+                                <small>Formats elegants et interactifs</small>
+                            </a>
+                        </div>
+                    </div>
+                    <a href="{% url 'core:home' %}#a-propos" class="home-nav-link">À propos</a>
+                    <a href="{% url 'core:home' %}#contact" class="home-nav-link">Contact</a>
+                {% else %}
+                    <a href="{% url 'core:home' %}" class="nav-chip">Accueil</a>
+                    <a href="{% url 'accounts:login' %}" class="btn-secondary">Connexion</a>
+                    <a href="{% url 'accounts:signup' %}" class="btn-primary">Inscription</a>
+                {% endif %}
+            </nav>
+
+            <!-- Bouton du menu mobile -->
+            <button
+                type="button"
+                class="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-white/5 text-white lg:hidden"
+                style="border: none !important;"
+                @click="mobileMenuOpen = !mobileMenuOpen"
+                :aria-expanded="mobileMenuOpen.toString()"
+                aria-label="Afficher le menu"
+            >
+                <!-- Icône Hamburger -->
+                <svg x-show="!mobileMenuOpen" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm1 4a1 1 0 100 2h12a1 1 0 100-2H4z" clip-rule="evenodd" />
+                </svg>
+                <!-- Icône Fermer -->
+                <svg x-show="mobileMenuOpen" x-cloak xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                </svg>
+            </button>
+        </div>
+
+        <!-- Navigation Mobile -->
+        <nav x-show="mobileMenuOpen" x-cloak class="mt-4 space-y-3 pt-4 lg:hidden" style="border: none !important;" @click.outside="mobileMenuOpen = false">
+            {% if request.resolver_match and request.resolver_match.url_name == 'home' %}
+                <a href="{% url 'core:home' %}" class="home-mobile-link w-full block text-center">Accueil</a>
+                <button type="button" class="home-mobile-link inline-flex w-full items-center justify-center gap-2 text-center" @click="mobileServiceOpen = !mobileServiceOpen" :aria-expanded="mobileServiceOpen.toString()" aria-controls="mobile-service-menu">
+                    Service
+                    <svg xmlns="http://www.w3.org/2000/svg" class="service-chevron h-4 w-4" :class="mobileServiceOpen ? 'is-open' : ''" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+                    </svg>
+                </button>
+                <div id="mobile-service-menu" x-show="mobileServiceOpen" x-cloak class="space-y-2">
+                    <a href="{% url 'core:home' %}#service-graphique-design" class="home-mobile-link w-full block text-center">Graphique design</a>
+                    <a href="{% url 'core:home' %}#service-invitation" class="home-mobile-link w-full block text-center">Invitation</a>
+                </div>
+                <a href="{% url 'core:home' %}#a-propos" class="home-mobile-link w-full block text-center">À propos</a>
+                <a href="{% url 'core:home' %}#contact" class="home-mobile-link w-full block text-center">Contact</a>
+                <a href="{% url 'accounts:signup' %}" class="nav-launch-cta inline-flex w-full items-center justify-center rounded-xl px-4 py-3 text-sm font-semibold text-white">C'est parti</a>
+            {% else %}
+                <a href="{% url 'accounts:login' %}" class="btn-secondary w-full block text-center">Connexion</a>
+                <a href="{% url 'accounts:signup' %}" class="btn-primary w-full block text-center">Inscription</a>
+            {% endif %}
+        </nav>
+    </div>
+    </header>
+    {% endif %}
+
+    <main class="{% if request.user.is_authenticated %}workspace-main{% else %}section-shell relative z-10{% endif %} pb-16">
+        {% if messages %}
+            <div class="space-y-3 pb-6">
+                {% for message in messages %}
+                    <div class="glass-card border-l-4 border-rose-500 px-5 py-4 text-sm">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        {% block content %}{% endblock %}
+    </main>
+
+    {% if not request.user.is_authenticated and not request.resolver_match or not request.user.is_authenticated and request.resolver_match.view_name != 'accounts:login' and request.resolver_match.view_name != 'accounts:signup' %}
+    <footer id="contact" class="site-footer section-shell" aria-label="Pied de page">
+        <div class="site-footer__shell">
+            <div class="site-footer__top">
+                <div class="site-footer__brand">
+                    <img src="{% static 'media/branding/logo2.svg' %}" alt="Likita" class="site-footer__logo">
+                    <div>
+                        <p class="site-footer__title">Likita</p>
+                        <p class="site-footer__subtitle">Invitation digitale élégante, RSVP intelligent, scanner QR en temps réel.</p>
+                        <div class="site-footer__socials" aria-label="Réseaux sociaux">
+                            <a class="site-footer__social" href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+                                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7.8 2h8.4C19.4 2 22 4.6 22 7.8v8.4c0 3.2-2.6 5.8-5.8 5.8H7.8C4.6 22 2 19.4 2 16.2V7.8C2 4.6 4.6 2 7.8 2zm-.2 2A3.6 3.6 0 004 7.6v8.8A3.6 3.6 0 007.6 20h8.8a3.6 3.6 0 003.6-3.6V7.6A3.6 3.6 0 0016.4 4H7.6zm9.65 1.5a1.15 1.15 0 110 2.3 1.15 1.15 0 010-2.3zM12 7a5 5 0 110 10 5 5 0 010-10zm0 2a3 3 0 100 6 3 3 0 000-6z"/></svg>
+                            </a>
+                            <a class="site-footer__social" href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+                                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13.5 22v-8h2.7l.5-3h-3.2V9.1c0-.9.4-1.6 1.8-1.6H17V4.7c-.3 0-1.2-.2-2.4-.2-2.4 0-4.1 1.5-4.1 4.4V11H8v3h2.5v8h3z"/></svg>
+                            </a>
+                            <a class="site-footer__social" href="https://linkedin.com" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+                                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6.7 8.5A1.7 1.7 0 105 6.8a1.7 1.7 0 001.7 1.7zM5.2 10h3V20h-3V10zm5.1 0h2.9v1.4h.1c.4-.8 1.4-1.7 2.9-1.7 3.1 0 3.7 2 3.7 4.7V20h-3v-4.9c0-1.2 0-2.6-1.6-2.6s-1.8 1.2-1.8 2.5V20h-3V10z"/></svg>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="site-footer__grid">
+                    <div class="site-footer__col">
+                        <p class="site-footer__head">Navigation</p>
+                        <div class="site-footer__links">
+                            <a href="{% url 'core:home' %}">Accueil</a>
+                            <a href="{% url 'events:list' %}">Événements</a>
+                            <a href="{% url 'guests:list' %}">Invités</a>
+                            <a href="{% url 'scanner:home' %}">Scanner</a>
+                        </div>
+                    </div>
+
+                    <div class="site-footer__col">
+                        <p class="site-footer__head">Compte</p>
+                        <div class="site-footer__links">
+                            {% if request.user.is_authenticated %}
+                                <a href="{% url 'dashboard:home' %}">Tableau de bord</a>
+                                <a href="{% url 'accounts:profile' %}">Profil</a>
+                                <form method="post" action="{% url 'accounts:logout' %}">
+                                    {% csrf_token %}
+                                    <button type="submit" style="color: rgba(255, 255, 255, 0.74); text-align: left;">Déconnexion</button>
+                                </form>
+                            {% else %}
+                                <a href="{% url 'accounts:login' %}">Connexion</a>
+                                <a href="{% url 'accounts:signup' %}">Inscription</a>
+                            {% endif %}
+                            <a href="{% url 'notifications:list' %}">Notifications</a>
+                        </div>
+                    </div>
+
+                    <div class="site-footer__col">
+                        <p class="site-footer__head">Action rapide</p>
+                        <div class="site-footer__links">
+                            <a class="site-footer__cta" href="{% url 'events:create' %}">Créer un événement</a>
+                            <span style="color: rgba(255, 255, 255, 0.74);">Support: hello@likita.app</span>
+                        </div>
+                        <div class="site-footer__newsletter">
+                            <p>Recevez nos nouveautés produit.</p>
+                            <div class="site-footer__newsletter-row">
+                                <input class="site-footer__newsletter-input" type="email" placeholder="Votre email" aria-label="Adresse email">
+                                <a class="site-footer__newsletter-btn" href="mailto:hello@likita.app?subject=Newsletter%20Likita">S'inscrire</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="site-footer__meta">
+                <span>© {% now "Y" %} Likita. Tous droits réservés.</span>
+                <span>Construit pour des experiences d'invitation premium.</span>
+            </div>
+        </div>
+    </footer>
+    {% endif %}
+</body>
+</html>

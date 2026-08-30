@@ -1,0 +1,11 @@
+django==6.0.1
+djangorestframework
+Pillow
+celery[redis]
+redis
+django-environ
+psycopg[binary]
+qrcode[pil]
+whitenoise
+django-htmx
+gunicorn

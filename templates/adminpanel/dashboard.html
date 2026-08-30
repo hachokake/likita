@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+
+{% block title %}Administration | Likita{% endblock %}
+
+{% block content %}
+<section class="space-y-8">
+    <div class="glass-card p-6 sm:p-8">
+        <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+                <p class="text-xs uppercase tracking-[0.3em] text-white/40">Centre de controle administrateur</p>
+                <h1 class="mt-2 text-3xl font-semibold sm:text-4xl">Pilotage total de la plateforme</h1>
+                <p class="mt-3 max-w-3xl text-white/60">Supervisez les utilisateurs, maitrisez les evenements, suivez l'activite systeme et intervenez instantanement avec un back-office 100% personnalise.</p>
+            </div>
+            <div class="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
+                <a href="{% url 'adminpanel:users' %}" class="btn-primary w-full sm:w-auto">Gerer les utilisateurs</a>
+                <a href="{% url 'adminpanel:events' %}" class="btn-secondary w-full sm:w-auto">Gerer les evenements</a>
+            </div>
+        </div>
+    </div>
+
+    <nav class="glass-card flex flex-wrap gap-3 p-4">
+        <a href="{% url 'adminpanel:dashboard' %}" class="btn-primary">Vue d'ensemble</a>
+        <a href="{% url 'adminpanel:users' %}" class="nav-chip">Utilisateurs</a>
+        <a href="{% url 'adminpanel:events' %}" class="nav-chip">Evenements</a>
+    </nav>
+
+    <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <div class="metric-card"><p class="text-sm text-white/45">Utilisateurs</p><p class="mt-3 text-4xl font-semibold">{{ global_stats.users }}</p></div>
+        <div class="metric-card"><p class="text-sm text-white/45">Utilisateurs suspendus</p><p class="mt-3 text-4xl font-semibold">{{ global_stats.suspended_users }}</p></div>
+        <div class="metric-card"><p class="text-sm text-white/45">Evenements</p><p class="mt-3 text-4xl font-semibold">{{ global_stats.events }}</p></div>
+        <div class="metric-card"><p class="text-sm text-white/45">Evenements publies</p><p class="mt-3 text-4xl font-semibold">{{ global_stats.published_events }}</p></div>
+    </div>
+    <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <div class="metric-card"><p class="text-sm text-white/45">Invites</p><p class="mt-3 text-4xl font-semibold">{{ global_stats.guests }}</p></div>
+        <div class="metric-card"><p class="text-sm text-white/45">Scans</p><p class="mt-3 text-4xl font-semibold">{{ global_stats.scans }}</p></div>
+        <div class="metric-card"><p class="text-sm text-white/45">Scans valides</p><p class="mt-3 text-4xl font-semibold">{{ global_stats.successful_scans }}</p></div>
+        <div class="metric-card"><p class="text-sm text-white/45">Comptes staff</p><p class="mt-3 text-4xl font-semibold">{{ global_stats.staff }}</p></div>
+    </div>
+
+    <div class="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
+        <div class="glass-card p-6">
+            <div class="flex items-center justify-between gap-4">
+                <h2 class="text-2xl font-semibold">Top comptes</h2>
+                <a href="{% url 'adminpanel:users' %}" class="text-sm text-rose-300">Tout voir</a>
+            </div>
+            <div class="mt-6 space-y-4">
+                {% for account in top_accounts %}
+                    <div class="flex items-center justify-between rounded-3xl border border-white/10 bg-white/5 px-4 py-3">
+                        <span>{{ account.email }}</span>
+                        <span class="text-white/45">{{ account.total_events }} evenements</span>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="glass-card p-6">
+            <h2 class="text-2xl font-semibold">Activite recente</h2>
+            <div class="mt-6 space-y-4">
+                {% for item in recent_activity %}
+                    <div class="rounded-3xl border border-white/10 bg-white/5 p-4">
+                        <p class="font-semibold">{{ item.action }}</p>
+                        <p class="mt-1 text-sm text-white/60">{{ item.actor|default:'Systeme' }} · {{ item.created_at }}</p>
+                    </div>
+                {% empty %}
+                    <p class="text-white/55">Aucun journal enregistre.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="grid gap-6 lg:grid-cols-2">
+        <div class="glass-card p-6">
+            <h2 class="text-2xl font-semibold">Nouveaux utilisateurs</h2>
+            <div class="mt-6 space-y-3">
+                {% for user in recent_users %}
+                    <a href="{% url 'adminpanel:user-detail' user.pk %}" class="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-4 py-3 transition hover:bg-white/10">
+                        <span>{{ user.email }}</span>
+                        <span class="text-sm text-white/45">{{ user.date_joined }}</span>
+                    </a>
+                {% empty %}
+                    <p class="text-white/55">Aucun utilisateur enregistre.</p>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="glass-card p-6">
+            <h2 class="text-2xl font-semibold">Derniers evenements crees</h2>
+            <div class="mt-6 space-y-3">
+                {% for event in recent_events %}
+                    <a href="{% url 'adminpanel:event-detail' event.pk %}" class="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-4 py-3 transition hover:bg-white/10">
+                        <span>{{ event.name }}</span>
+                        <span class="text-sm text-white/45">{{ event.owner.email }}</span>
+                    </a>
+                {% empty %}
+                    <p class="text-white/55">Aucun evenement cree.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="grid gap-6 lg:grid-cols-2">
+        <div class="glass-card p-6">
+            <h2 class="text-2xl font-semibold">Etat des invites</h2>
+            <div class="mt-6 space-y-4">
+                {% for item in status_mix %}
+                    <div class="flex items-center justify-between rounded-3xl border border-white/10 bg-white/5 px-4 py-3">
+                        <span>{{ item.status }}</span>
+                        <span class="font-semibold">{{ item.total }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="glass-card p-6">
+            <h2 class="text-2xl font-semibold">Etat des scans</h2>
+            <div class="mt-6 space-y-4">
+                {% for item in scan_mix %}
+                    <div class="flex items-center justify-between rounded-3xl border border-white/10 bg-white/5 px-4 py-3">
+                        <span>{{ item.status }}</span>
+                        <span class="font-semibold">{{ item.total }}</span>
+                    </div>
+                {% empty %}
+                    <p class="text-white/55">Aucun log de scan pour le moment.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

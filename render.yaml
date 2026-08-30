@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: likita-web
+    env: python
+    plan: starter
+    buildCommand: pip install -r requirements/base.txt && npm install && npm run build:css && python manage.py migrate && python manage.py collectstatic --noinput
+    startCommand: gunicorn config.wsgi --log-file -
+    envVars:
+      - key: DJANGO_DEBUG
+        value: "False"
+      - key: DATABASE_URL
+        sync: false
+      - key: DJANGO_SECRET_KEY
+        sync: false
+      - key: CELERY_BROKER_URL
+        sync: false
+  - type: worker
+    name: likita-worker
+    env: python
+    plan: starter
+    buildCommand: pip install -r requirements/base.txt
+    startCommand: celery -A config worker --loglevel=info

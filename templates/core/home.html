@@ -1,0 +1,445 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Likita | Invitations haut de gamme{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --motion-ease-premium: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .invitation-carousel {
+        background: transparent;
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0;
+    }
+
+    .carousel-photo {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        background-color: transparent;
+        backface-visibility: hidden;
+        transform: scale(1);
+        transition: transform 900ms var(--motion-ease-premium), filter 400ms ease;
+    }
+
+    .carousel-slide:hover .carousel-photo {
+        transform: scale(1.035);
+        filter: saturate(1.08) contrast(1.05);
+    }
+
+    .carousel-stage::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to top, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.2) 35%, transparent 100%);
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    /* Zones cliquables gauche et droite bien délimitées */
+    .carousel-click-zone {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 40%;
+        z-index: 5;
+        cursor: pointer;
+        background: transparent;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .carousel-click-zone-left {
+        left: 0;
+    }
+
+    .carousel-click-zone-right {
+        right: 0;
+    }
+
+    .btn-primary,
+    .btn-secondary,
+    .nav-chip {
+        position: relative;
+        overflow: hidden;
+        transition: transform 280ms var(--motion-ease-premium), color 220ms ease, opacity 220ms ease;
+        will-change: transform;
+    }
+
+    .btn-primary::before,
+    .btn-secondary::before,
+    .nav-chip::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(120deg, transparent 0%, rgba(255, 255, 255, 0.2) 48%, transparent 100%);
+        transform: translateX(-130%);
+        transition: transform 600ms var(--motion-ease-premium);
+        pointer-events: none;
+    }
+
+    .btn-primary:hover,
+    .btn-secondary:hover,
+    .nav-chip:hover {
+        transform: translateY(-2px) scale(1.02);
+    }
+
+    .btn-primary:hover::before,
+    .btn-secondary:hover::before,
+    .nav-chip:hover::before {
+        transform: translateX(130%);
+    }
+
+    .btn-primary:active,
+    .btn-secondary:active,
+    .nav-chip:active {
+        transform: translateY(0) scale(0.985);
+    }
+
+    .metric-card,
+    .glass-card {
+        transition: transform 320ms var(--motion-ease-premium), box-shadow 320ms var(--motion-ease-premium);
+    }
+
+    .metric-card:hover,
+    .glass-card:hover {
+        transform: translateY(-3px);
+    }
+
+    /* Transition d'image elegante et stable */
+    .carousel-enter {
+        transition: opacity 700ms cubic-bezier(0.22, 1, 0.36, 1), transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .carousel-leave {
+        transition: opacity 550ms cubic-bezier(0.4, 0, 0.2, 1), transform 550ms cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .carousel-enter-start {
+        opacity: 0;
+        transform: scale(1.035);
+    }
+
+    .carousel-enter-end {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    .carousel-leave-start {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    .carousel-leave-end {
+        opacity: 0;
+        transform: scale(0.985);
+    }
+
+    .carousel-dot {
+        border: none;
+        width: 0.55rem;
+        height: 0.55rem;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.25);
+        transition: all 300ms cubic-bezier(0.16, 1, 0.3, 1);
+        cursor: pointer;
+    }
+
+    .carousel-dot:hover {
+        background: rgba(255, 255, 255, 0.6);
+    }
+
+    .carousel-dot.is-active {
+        width: 1.75rem;
+        background: #fff;
+        box-shadow: 0 0 12px rgba(255, 255, 255, 0.6);
+    }
+
+    .carousel-stage {
+        height: 460px;
+        border-radius: 20px;
+        overflow: hidden;
+        position: relative;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        border: none !important;
+        user-select: none;
+    }
+
+    .carousel-slide {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        transform: scale(1.02);
+        transition: opacity 700ms cubic-bezier(0.22, 1, 0.36, 1), transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+        pointer-events: none;
+        will-change: opacity, transform;
+    }
+
+    .carousel-slide.is-active {
+        opacity: 1;
+        transform: scale(1);
+        pointer-events: auto;
+        z-index: 2;
+    }
+
+    .carousel-slide.is-inactive {
+        opacity: 0;
+        transform: scale(0.985);
+        z-index: 1;
+    }
+
+    /* Amélioration de la fluidité des slides Swiper pour une transition ultra élégante */
+    .swiper-wrapper {
+        transition-timing-function: cubic-bezier(0.25, 1, 0.5, 1) !important;
+    }
+
+    .interactive-video-wrap {
+        display: flex;
+        justify-content: center;
+        margin-top: 1.25rem;
+        background: transparent;
+    }
+
+    .video-panel {
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+    }
+
+    .interactive-video {
+        width: min(100%, 360px);
+        aspect-ratio: 9 / 16;
+        display: block;
+        object-fit: cover;
+        border-radius: 1.1rem;
+        background: transparent;
+        border: none;
+        box-shadow: none;
+    }
+
+    @media (min-width: 640px) {
+        .carousel-stage {
+            height: 520px;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .carousel-photo,
+        .btn-primary,
+        .btn-secondary,
+        .nav-chip,
+        .metric-card,
+        .glass-card {
+            transition: none !important;
+            animation: none !important;
+            transform: none !important;
+        }
+
+        .btn-primary::before,
+        .btn-secondary::before,
+        .nav-chip::before {
+            display: none;
+        }
+
+    }
+</style>
+
+<section id="a-propos" class="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
+    <div class="space-y-8">
+        <p class="inline-flex rounded-full border border-white/10 bg-white/6 px-4 py-2 text-xs uppercase tracking-[0.35em] text-white/50">Experience produit moderne et elegante</p>
+        <div class="space-y-5">
+            <h1 class="max-w-4xl text-5xl font-semibold leading-tight sm:text-6xl">Invitations evenementielles haut de gamme, RSVP intelligents et controle d'acces QR en une seule plateforme.</h1>
+            <p class="max-w-2xl text-lg text-white/65">Likita centralise la creation d'evenements, les messages WhatsApp personnalises, la confirmation des invites et le scan d'entree dans une experience SaaS elegante et evolutive.</p>
+        </div>
+        <div class="flex flex-wrap gap-4">
+            <a href="{% url 'accounts:signup' %}" class="btn-primary">Lancer mon espace</a>
+            <a href="{% url 'accounts:login' %}" class="btn-secondary">Se connecter</a>
+        </div>
+        <div class="grid gap-4 sm:grid-cols-3">
+            <div class="metric-card">
+                <p class="text-xs uppercase tracking-[0.25em] text-white/40">WhatsApp</p>
+                <p class="mt-3 text-3xl font-semibold">1 clic</p>
+                <p class="mt-2 text-sm text-white/55">Invitation unique prete a envoyer.</p>
+            </div>
+            <div class="metric-card">
+                <p class="text-xs uppercase tracking-[0.25em] text-white/40">RSVP</p>
+                <p class="mt-3 text-3xl font-semibold">Temps reel</p>
+                <p class="mt-2 text-sm text-white/55">Presence, accompagnants et messages.</p>
+            </div>
+            <div class="metric-card">
+                <p class="text-xs uppercase tracking-[0.25em] text-white/40">Scanner</p>
+                <p class="mt-3 text-3xl font-semibold">QR securise</p>
+                <p class="mt-2 text-sm text-white/55">Validation, logs et notifications.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="glass-card overflow-hidden p-6">
+        <div class="rounded-[24px] border border-white/10 bg-black/30 p-5">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-xs uppercase tracking-[0.25em] text-white/35">Apercu du tableau de bord</p>
+                    <h2 class="mt-2 text-2xl font-semibold">Gestion premium des invites</h2>
+                </div>
+                <span class="rounded-full bg-emerald-500/15 px-3 py-1 text-xs text-emerald-300">En direct</span>
+            </div>
+            <div class="mt-6 grid gap-4">
+                {% for event in featured_events %}
+                    <div class="rounded-3xl border border-white/10 bg-white/5 p-5">
+                        <div class="flex items-start justify-between gap-4">
+                            <div>
+                                <p class="text-sm text-white/45">{{ event.get_event_type_display }}</p>
+                                <h3 class="mt-1 text-xl font-semibold">{{ event.name }}</h3>
+                                <p class="mt-2 text-sm text-white/55">{{ event.address }}</p>
+                            </div>
+                            <span class="rounded-full border border-white/10 px-3 py-1 text-xs text-white/55">{{ event.event_date }}</span>
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="rounded-3xl border border-dashed border-white/10 bg-white/4 p-8 text-center text-white/55">Publiez un premier evenement pour voir la vitrine Likita prendre forme.</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="service-graphique-design" class="mt-14 space-y-6">
+    <div class="glass-card p-6 sm:p-8">
+        <p class="text-xs uppercase tracking-[0.32em] text-white/45">Nos formats d'invitation</p>
+        <h2 class="mt-2 text-3xl font-semibold sm:text-4xl">2 types d'invitation pour tous vos evenements</h2>
+        <p class="mt-3 max-w-3xl text-white/65">Likita realise des invitations electroniques elegantes et des invitations interactives avec animations/video pour une experience plus vivante.</p>
+    </div>
+
+    <section
+        class="invitation-carousel glass-card overflow-hidden p-4 sm:p-5"
+        x-data="{
+            active: 0,
+            timer: null,
+            touchStartX: 0,
+            touchEndX: 0,
+            slides: [
+                {
+                    img: '{% static "media/invitations/collation-grandre.jpeg" %}',
+                    alt: 'Exemple invitation collation de grade',
+                    tag: 'Electronique',
+                    title: 'Collation de grade',
+                    text: 'Design premium, QR code et diffusion rapide par WhatsApp ou email.'
+                },
+                {
+                    img: '{% static "media/invitations/mariage.jpeg" %}',
+                    alt: 'Exemple invitation mariage',
+                    tag: 'Electronique',
+                    title: 'Mariage',
+                    text: 'Papeterie digitale raffinee avec confirmation RSVP integree.'
+                },
+                {
+                    img: '{% static "media/invitations/anniversaire.jpeg" %}',
+                    alt: 'Exemple invitation anniversaire',
+                    tag: 'Electronique',
+                    title: 'Anniversaire',
+                    text: 'Format mobile-first, personnalise et pret a envoyer en quelques clics.'
+                }
+            ],
+            next() {
+                this.active = (this.active + 1) % this.slides.length;
+            },
+            prev() {
+                this.active = (this.active - 1 + this.slides.length) % this.slides.length;
+            },
+            goTo(index) {
+                this.active = index;
+            },
+            onTouchStart(event) {
+                this.touchStartX = event.changedTouches[0].clientX;
+            },
+            onTouchEnd(event) {
+                this.touchEndX = event.changedTouches[0].clientX;
+                const deltaX = this.touchEndX - this.touchStartX;
+                const swipeThreshold = 45;
+
+                if (Math.abs(deltaX) < swipeThreshold) {
+                    return;
+                }
+
+                if (deltaX < 0) {
+                    this.next();
+                } else {
+                    this.prev();
+                }
+            },
+            start() {
+                this.stop();
+                this.timer = setInterval(() => this.next(), 5000);
+            },
+            stop() {
+                if (this.timer) {
+                    clearInterval(this.timer);
+                    this.timer = null;
+                }
+            }
+        }"
+        x-init="start()"
+        @mouseenter="stop()"
+        @mouseleave="start()"
+    >
+        <div
+            class="carousel-stage relative overflow-hidden border border-white/10 bg-black/25"
+            @touchstart.passive="onTouchStart($event)"
+            @touchend.passive="onTouchEnd($event)"
+        >
+            <template x-for="(slide, index) in slides" :key="slide.img">
+                <article
+                    class="carousel-slide"
+                    :class="active === index ? 'is-active' : 'is-inactive'"
+                >
+                    <img :src="slide.img" :alt="slide.alt" class="carousel-photo">
+
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/82 via-black/35 to-transparent"></div>
+
+                    <div class="absolute inset-x-0 bottom-0 p-5 sm:p-7">
+                        <p class="inline-flex rounded-full border border-white/20 bg-black/35 px-3 py-1 text-xs uppercase tracking-[0.22em] text-white/85" x-text="slide.tag"></p>
+                        <h3 class="mt-3 text-2xl font-semibold text-white sm:text-3xl" x-text="slide.title"></h3>
+                        <p class="mt-2 max-w-2xl text-sm text-white/80 sm:text-base" x-text="slide.text"></p>
+                    </div>
+                </article>
+            </template>
+
+            <button type="button" class="carousel-click-zone carousel-click-zone-left" @click="prev()" aria-label="Precedent"></button>
+            <button type="button" class="carousel-click-zone carousel-click-zone-right" @click="next()" aria-label="Suivant"></button>
+
+        </div>
+
+        <div class="mt-4 flex items-center justify-center gap-2">
+            <template x-for="(slide, index) in slides" :key="`dot-${index}`">
+                <button
+                    type="button"
+                    class="carousel-dot"
+                    :class="active === index ? 'is-active' : ''"
+                    @click="goTo(index)"
+                    :aria-label="`Aller a l'image ${index + 1}`"
+                ></button>
+            </template>
+        </div>
+    </section>
+
+    <article id="service-invitation" class="video-panel overflow-hidden p-5 sm:p-6">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+            <div>
+                <p class="text-xs uppercase tracking-[0.32em] text-white/45">Invitation interactive</p>
+                <h3 class="mt-1 text-2xl font-semibold">Apercu video interactif</h3>
+            </div>
+            <span class="rounded-full border border-emerald-300/25 bg-emerald-400/12 px-3 py-1 text-xs text-emerald-200">Mode interactif</span>
+        </div>
+        <div class="interactive-video-wrap">
+            <video controls preload="metadata" playsinline class="interactive-video">
+                <source src="{% static 'media/invitations/invitation-interactive.mp4' %}" type="video/mp4">
+                Votre navigateur ne supporte pas la lecture video.
+            </video>
+        </div>
+    </article>
+</section>
+
+{% endblock %}

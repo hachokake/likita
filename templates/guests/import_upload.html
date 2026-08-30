@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block title %}Import invites | Likita{% endblock %}
+
+{% block content %}
+<section class="mx-auto max-w-4xl space-y-8">
+    <div>
+        <p class="text-xs uppercase tracking-[0.3em] text-white/40">Import intelligent</p>
+        <h1 class="mt-2 text-4xl font-semibold">Charger un fichier CSV ou Excel</h1>
+        <p class="mt-3 max-w-3xl text-white/60">Likita detecte les colonnes, vous laisse les mapper proprement, puis cree ou met a jour les invites selon votre strategie.</p>
+    </div>
+    <div class="glass-card p-8 sm:p-10">
+        <form method="post" enctype="multipart/form-data" class="grid gap-5 sm:grid-cols-2">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="space-y-2 {% if field.name == 'file' %}sm:col-span-2{% endif %}">
+                    <label class="text-sm text-white/60">{{ field.label }}</label>
+                    {{ field }}
+                    {{ field.errors }}
+                </div>
+            {% endfor %}
+            <button type="submit" class="btn-primary sm:col-span-2">Analyser le fichier</button>
+        </form>
+    </div>
+</section>
+{% endblock %}

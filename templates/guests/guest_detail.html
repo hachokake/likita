@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ guest.full_name }} | Likita{% endblock %}
+
+{% block content %}
+<section class="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
+    <div class="glass-card p-8">
+        <p class="text-sm text-white/45">{{ guest.event.name }}</p>
+        <h1 class="mt-2 text-4xl font-semibold">{{ guest.full_name }}</h1>
+        <div class="mt-6 space-y-3 text-sm text-white/60">
+            <p>WhatsApp: {{ guest.whatsapp_number }}</p>
+            <p>Courriel: {{ guest.email|default:'-' }}</p>
+            <p>Categorie: {{ guest.get_category_display }}</p>
+            <p>Accompagnants: {{ guest.allowed_companions }}</p>
+            <p>Table: {{ guest.reserved_table|default:'-' }}</p>
+        </div>
+        <div class="mt-8 flex gap-3">
+            <a href="{% url 'guests:edit' guest.pk %}" class="btn-secondary">Modifier</a>
+            <a href="{% url 'guests:delete' guest.pk %}" class="btn-secondary">Supprimer</a>
+            {% if guest.invitation %}<a href="{% url 'invitations:send' guest.invitation.token %}" class="btn-primary">Envoyer</a>{% endif %}
+        </div>
+    </div>
+    <div class="space-y-6">
+        <div class="glass-card p-6">
+            <h2 class="text-2xl font-semibold">Invitation</h2>
+            {% if guest.invitation %}
+                <div class="mt-4 text-sm text-white/60 space-y-2">
+                    <p>Token: {{ guest.invitation.token }}</p>
+                    <p>Statut: {{ guest.invitation.get_delivery_status_display }}</p>
+                    <a href="{% url 'invitations:public' guest.invitation.token %}" class="text-rose-300">Ouvrir la page publique</a>
+                </div>
+            {% endif %}
+        </div>
+        <div class="glass-card p-6">
+            <h2 class="text-2xl font-semibold">RSVP et QR</h2>
+            <div class="mt-4 text-sm text-white/60 space-y-2">
+                <p>Reponse: {{ guest.rsvp.get_response_display }}</p>
+                <p>Accompagnants confirmes: {{ guest.rsvp.companion_count }}</p>
+                <p>QR token: {{ guest.qrcode.token }}</p>
+            </div>
+            {% if guest.qrcode.image %}
+                <img src="{{ guest.qrcode.image.url }}" alt="QR Code" class="mt-5 h-48 w-48 rounded-3xl bg-white p-3">
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}
