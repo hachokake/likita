@@ -126,7 +126,7 @@ Sans ces variables, l'application repasse automatiquement en partage WhatsApp ma
 
 	project_home = '/home/votrecompte/likita'
 	if project_home not in sys.path:
-		 sys.path.insert(0, project_home)
+		sys.path.insert(0, project_home)
 
 	os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 
