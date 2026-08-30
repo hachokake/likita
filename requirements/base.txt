@@ -6,6 +6,7 @@ redis
 django-environ
 psycopg[binary]
 qrcode[pil]
+requests
 whitenoise
 django-htmx
 gunicorn
