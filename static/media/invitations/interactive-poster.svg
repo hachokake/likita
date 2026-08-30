@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720" role="img" aria-labelledby="title desc">
+  <title id="title">Apercu Invitation Interactive</title>
+  <desc id="desc">Poster video de demonstration invitation interactive.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#020617"/>
+      <stop offset="100%" stop-color="#1e293b"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fbbf24"/>
+      <stop offset="100%" stop-color="#f59e0b"/>
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="720" fill="url(#bg)"/>
+  <circle cx="640" cy="360" r="210" fill="rgba(245,158,11,0.14)"/>
+  <polygon points="590,290 590,430 720,360" fill="url(#gold)"/>
+  <text x="640" y="560" font-family="Arial, sans-serif" font-size="52" text-anchor="middle" fill="#f8fafc">Invitation Interactive</text>
+  <text x="640" y="620" font-family="Arial, sans-serif" font-size="30" text-anchor="middle" fill="#cbd5e1">Animation, transitions, interactions RSVP</text>
+</svg>

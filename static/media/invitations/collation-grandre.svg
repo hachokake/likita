@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1440" viewBox="0 0 1080 1440" role="img" aria-labelledby="title desc">
+  <title id="title">Invitation Collation de Grade</title>
+  <desc id="desc">Exemple visuel d'invitation electronique pour collation de grade.</desc>
+  <defs>
+    <linearGradient id="paper" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fffdf8"/>
+      <stop offset="100%" stop-color="#f8f3e8"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#d4a017"/>
+      <stop offset="100%" stop-color="#f5cf62"/>
+    </linearGradient>
+  </defs>
+  <rect width="1080" height="1440" fill="url(#paper)"/>
+  <rect x="68" y="68" width="944" height="1304" rx="40" fill="none" stroke="#d4a017" stroke-width="4"/>
+  <text x="540" y="220" font-family="Georgia, serif" font-size="54" text-anchor="middle" fill="#0f172a">INVITATION</text>
+  <text x="540" y="305" font-family="Georgia, serif" font-size="86" text-anchor="middle" fill="#0f172a">Collation de Grade</text>
+  <rect x="250" y="430" width="580" height="390" rx="36" fill="#0f172a"/>
+  <polygon points="540,490 650,560 430,560" fill="url(#gold)"/>
+  <rect x="350" y="900" width="380" height="130" rx="24" fill="#0f172a"/>
+  <text x="540" y="980" font-family="Arial, sans-serif" font-size="44" text-anchor="middle" fill="#f8fafc">22 AOUT - 18:00</text>
+  <text x="540" y="1140" font-family="Arial, sans-serif" font-size="42" text-anchor="middle" fill="#1e293b">Gabriel House</text>
+  <text x="540" y="1200" font-family="Arial, sans-serif" font-size="34" text-anchor="middle" fill="#475569">Lakeside</text>
+</svg>

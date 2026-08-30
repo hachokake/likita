@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1440" viewBox="0 0 1080 1440" role="img" aria-labelledby="title desc">
+  <title id="title">Invitation Anniversaire</title>
+  <desc id="desc">Exemple visuel d'invitation electronique anniversaire.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#eff6ff"/>
+      <stop offset="100%" stop-color="#dbeafe"/>
+    </linearGradient>
+  </defs>
+  <rect width="1080" height="1440" fill="url(#bg)"/>
+  <circle cx="170" cy="210" r="90" fill="#f97316" opacity="0.85"/>
+  <circle cx="910" cy="280" r="70" fill="#22c55e" opacity="0.75"/>
+  <circle cx="880" cy="1170" r="96" fill="#0ea5e9" opacity="0.78"/>
+  <rect x="100" y="140" width="880" height="1160" rx="48" fill="#ffffff"/>
+  <text x="540" y="320" font-family="Arial, sans-serif" font-size="56" font-weight="700" text-anchor="middle" fill="#0f172a">ANNIVERSAIRE</text>
+  <text x="540" y="430" font-family="cursive" font-size="108" text-anchor="middle" fill="#1d4ed8">Nadine 25 ans</text>
+  <rect x="290" y="530" width="500" height="420" rx="28" fill="#1e3a8a"/>
+  <rect x="510" y="455" width="60" height="76" rx="14" fill="#fb923c"/>
+  <rect x="460" y="760" width="160" height="190" rx="18" fill="#fb923c"/>
+  <text x="540" y="1060" font-family="Arial, sans-serif" font-size="42" text-anchor="middle" fill="#1e3a8a">Vendredi 08 - 19:00</text>
+  <text x="540" y="1126" font-family="Arial, sans-serif" font-size="34" text-anchor="middle" fill="#334155">Salon Elite, Gombe</text>
+</svg>

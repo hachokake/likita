@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1440" viewBox="0 0 1080 1440" role="img" aria-labelledby="title desc">
+  <title id="title">Invitation Mariage</title>
+  <desc id="desc">Exemple visuel d'invitation electronique de mariage.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fff7ed"/>
+      <stop offset="100%" stop-color="#ffedd5"/>
+    </linearGradient>
+  </defs>
+  <rect width="1080" height="1440" fill="url(#bg)"/>
+  <rect x="86" y="86" width="908" height="1268" rx="44" fill="none" stroke="#d97706" stroke-width="4"/>
+  <text x="540" y="220" font-family="Georgia, serif" font-size="48" text-anchor="middle" fill="#7c2d12">NOUS NOUS MARIONS</text>
+  <text x="540" y="320" font-family="cursive" font-size="108" text-anchor="middle" fill="#9a3412">Grace & Daniel</text>
+  <path d="M320 520c0-70 55-126 124-126 43 0 79 21 96 53 17-32 53-53 96-53 69 0 124 56 124 126 0 114-113 176-220 281-107-105-220-167-220-281z" fill="#ea580c" opacity="0.9"/>
+  <text x="540" y="960" font-family="Arial, sans-serif" font-size="42" text-anchor="middle" fill="#7c2d12">Samedi 14 Novembre - 15:00</text>
+  <text x="540" y="1030" font-family="Arial, sans-serif" font-size="38" text-anchor="middle" fill="#7c2d12">Jardin Royal, Kinshasa</text>
+  <text x="540" y="1170" font-family="Arial, sans-serif" font-size="34" text-anchor="middle" fill="#9a3412">RSVP +243 000 000 000</text>
+</svg>
