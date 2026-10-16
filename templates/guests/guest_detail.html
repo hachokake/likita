@@ -40,8 +40,57 @@
             </div>
             {% if guest.qrcode.image %}
                 <img src="{{ guest.qrcode.image.url }}" alt="QR Code" class="mt-5 h-48 w-48 rounded-3xl bg-white p-3">
+                {% if guest.rsvp.response == 'accepted' %}
+                    <div class="mt-5">
+                        {% if whatsapp_cloud_enabled %}
+                            <form method="post" action="{% url 'invitations:send-qr' guest.invitation.token %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn-primary">Envoyer le QR sur WhatsApp</button>
+                            </form>
+                        {% else %}
+                            <button type="button" id="share-qr-code" data-image-url="{{ guest.qrcode.image.url }}" data-file-name="qr-{{ guest.full_name|slugify }}.png" class="btn-primary">Partager le QR sur WhatsApp</button>
+                            <a id="download-qr-code" href="{{ guest.qrcode.image.url }}" download class="mt-3 inline-flex text-sm font-semibold text-rose-300 hover:text-rose-200">Télécharger le QR code</a>
+                            <p id="share-qr-status" class="mt-3 text-sm text-white/60"></p>
+                        {% endif %}
+                    </div>
+                {% endif %}
             {% endif %}
         </div>
     </div>
 </section>
+{% if guest.rsvp.response == 'accepted' and guest.qrcode.image and not whatsapp_cloud_enabled %}
+<script>
+const shareQrButton = document.getElementById('share-qr-code');
+const downloadQrLink = document.getElementById('download-qr-code');
+const shareQrStatus = document.getElementById('share-qr-status');
+
+shareQrButton.addEventListener('click', async () => {
+    shareQrButton.disabled = true;
+    shareQrStatus.textContent = 'Préparation du QR code...';
+    try {
+        const response = await fetch(shareQrButton.dataset.imageUrl);
+        if (!response.ok) {
+            throw new Error('Le QR code ne peut pas être téléchargé.');
+        }
+        const image = await response.blob();
+        const file = new File([image], shareQrButton.dataset.fileName, { type: image.type || 'image/png' });
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            await navigator.share({ files: [file] });
+            shareQrStatus.textContent = 'Sélectionnez WhatsApp pour envoyer uniquement cette image.';
+        } else {
+            downloadQrLink.click();
+            shareQrStatus.textContent = 'Le QR code a été téléchargé. Joignez cette image dans WhatsApp.';
+        }
+    } catch (error) {
+        if (error.name === 'AbortError') {
+            shareQrStatus.textContent = 'Partage annulé.';
+        } else {
+            shareQrStatus.textContent = error.message;
+        }
+    } finally {
+        shareQrButton.disabled = false;
+    }
+});
+</script>
+{% endif %}
 {% endblock %}

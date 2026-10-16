@@ -22,7 +22,14 @@ class SignUpForm(StyledFormMixin, UserCreationForm):
     class Meta(UserCreationForm.Meta):
         model = User
         fields = ('first_name', 'last_name', 'email', 'phone_number', 'company_name')
+        labels = {
+            'first_name': 'Prénom',
+            'last_name': 'Nom',
+            'email': 'Adresse e-mail',
+            'phone_number': 'Numéro de téléphone',
+            'company_name': 'Nom de l’entreprise',
+        }
 
 
 class BosanganiAuthenticationForm(StyledFormMixin, AuthenticationForm):
-    username = forms.EmailField(label='Email')
+    username = forms.EmailField(label='Adresse e-mail')

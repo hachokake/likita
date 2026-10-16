@@ -7,8 +7,8 @@
     <div class="flex flex-wrap items-end justify-between gap-4">
         <div>
             <p class="text-xs uppercase tracking-[0.3em] text-white/40">Gestion des invites</p>
-            <h1 class="mt-2 text-4xl font-semibold">Carnet d'invites</h1>
-            <p class="mt-3 max-w-2xl text-white/60">Centralisez vos listes VIP, familles et groupes avec import massif, tri instantane et envoi WhatsApp Business.</p>
+            <h1 class="mt-2 text-4xl font-semibold">{% if selected_event %}Invités · {{ selected_event.name }}{% else %}Carnet d'invités{% endif %}</h1>
+            <p class="mt-3 max-w-2xl text-white/60">Centralisez vos listes VIP, familles et groupes avec import massif, filtres de réponse et envoi WhatsApp Business.</p>
         </div>
         <div class="flex flex-wrap gap-3">
             <a href="{% url 'guests:import-upload' %}" class="btn-secondary">Importer CSV / Excel</a>
@@ -16,9 +16,21 @@
         </div>
     </div>
     <div class="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
-        <form method="get" class="glass-card flex flex-col gap-3 p-4 sm:flex-row">
-            <input type="search" name="q" value="{{ request.GET.q }}" placeholder="Rechercher un nom, telephone ou categorie" class="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/35 focus:border-rose-500 focus:outline-none">
-            <button class="btn-secondary">Rechercher</button>
+        <form method="get" class="glass-card grid gap-3 p-4 sm:grid-cols-2 xl:grid-cols-4">
+            <input type="search" name="q" value="{{ request.GET.q }}" placeholder="Rechercher un nom, téléphone ou catégorie" class="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/35 focus:border-rose-500 focus:outline-none">
+            <select name="event" class="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white focus:border-rose-500 focus:outline-none">
+                <option value="">Tous les événements</option>
+                {% for event in event_choices %}
+                    <option value="{{ event.pk }}" {% if selected_event and selected_event.pk == event.pk %}selected{% endif %}>{{ event.name }}</option>
+                {% endfor %}
+            </select>
+            <select name="response" class="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white focus:border-rose-500 focus:outline-none">
+                <option value="">Toutes les réponses</option>
+                {% for value, label in response_choices %}
+                    <option value="{{ value }}" {% if selected_response == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+            <button class="btn-secondary">Filtrer</button>
         </form>
         <div class="glass-card grid grid-cols-3 gap-3 p-4 text-center">
             <div>
@@ -75,8 +87,8 @@
         <div class="flex items-center justify-between pt-4 text-sm text-white/55">
             <span>Page {{ page_obj.number }} sur {{ page_obj.paginator.num_pages }}</span>
             <div class="flex gap-3">
-                {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="btn-secondary">Precedent</a>{% endif %}
-                {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="btn-secondary">Suivant</a>{% endif %}
+                {% if page_obj.has_previous %}<a href="?{{ pagination_query }}{% if pagination_query %}&{% endif %}page={{ page_obj.previous_page_number }}" class="btn-secondary">Precedent</a>{% endif %}
+                {% if page_obj.has_next %}<a href="?{{ pagination_query }}{% if pagination_query %}&{% endif %}page={{ page_obj.next_page_number }}" class="btn-secondary">Suivant</a>{% endif %}
             </div>
         </div>
     {% endif %}

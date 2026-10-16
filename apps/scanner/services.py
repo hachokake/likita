@@ -15,6 +15,17 @@ def process_scan(token, user=None, scanner_label='', device_info=''):
 
     event = qr_code.event
     guest = qr_code.guest
+    if user is None or event.owner_id != user.pk:
+        log = ScanLog.objects.create(
+            event=event,
+            qr_code=qr_code,
+            scanned_by=user,
+            scanner_label=scanner_label,
+            device_info=device_info,
+            status=ScanLog.ScanStatus.INVALID,
+        )
+        return {'ok': False, 'message': 'QR non autorisé', 'guest': None, 'log': log}
+
     if qr_code.scan_count and not event.allow_multiple_entries:
         log = ScanLog.objects.create(
             event=event,

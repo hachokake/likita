@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
 from django.shortcuts import redirect
@@ -8,6 +9,7 @@ from django.views.generic import CreateView, DeleteView, DetailView, FormView, L
 from apps.guests.forms import GuestForm, GuestImportMappingForm, GuestImportUploadForm
 from apps.guests.models import Guest
 from apps.guests.services import import_guest_rows, parse_guest_import_file
+from apps.rsvp.models import RSVP
 
 IMPORT_SESSION_KEY = 'guest_import_payload'
 
@@ -15,6 +17,18 @@ IMPORT_SESSION_KEY = 'guest_import_payload'
 class OwnerGuestMixin(LoginRequiredMixin):
     def get_queryset(self):
         queryset = Guest.objects.filter(event__owner=self.request.user).select_related('event', 'invitation', 'rsvp', 'qrcode')
+        self.event_choices = self.request.user.events.order_by('-event_date', '-event_time')
+        self.selected_event = None
+        event_id = self.request.GET.get('event', '').strip()
+        if event_id:
+            self.selected_event = self.event_choices.filter(pk=event_id).first()
+            queryset = queryset.filter(event=self.selected_event) if self.selected_event else queryset.none()
+
+        self.selected_response = self.request.GET.get('response', '').strip()
+        valid_responses = {value for value, _ in RSVP.Response.choices}
+        if self.selected_response in valid_responses:
+            queryset = queryset.filter(rsvp__response=self.selected_response)
+
         search_term = self.request.GET.get('q', '').strip()
         if search_term:
             queryset = queryset.filter(
@@ -30,10 +44,26 @@ class GuestListView(OwnerGuestMixin, ListView):
     context_object_name = 'guests'
     paginate_by = 20
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['event_choices'] = self.event_choices
+        context['selected_event'] = self.selected_event
+        context['response_choices'] = RSVP.Response.choices
+        context['selected_response'] = self.selected_response
+        pagination_query = self.request.GET.copy()
+        pagination_query.pop('page', None)
+        context['pagination_query'] = pagination_query.urlencode()
+        return context
+
 
 class GuestDetailView(OwnerGuestMixin, DetailView):
     template_name = 'guests/guest_detail.html'
     context_object_name = 'guest'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['whatsapp_cloud_enabled'] = settings.WHATSAPP_PROVIDER == 'whatsapp_cloud'
+        return context
 
 
 class GuestCreateView(LoginRequiredMixin, CreateView):

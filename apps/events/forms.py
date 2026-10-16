@@ -25,6 +25,24 @@ class EventForm(StyledFormMixin, forms.ModelForm):
             'background_music',
             'allow_multiple_entries',
         ]
+        labels = {
+            'name': "Nom de l’événement",
+            'event_type': "Type d’événement",
+            'description': 'Description',
+            'host_names': 'Noms des hôtes',
+            'cover_image': 'Image de couverture',
+            'event_date': "Date de l’événement",
+            'event_time': "Heure de l’événement",
+            'address': 'Adresse',
+            'google_maps_url': 'Lien Google Maps',
+            'detailed_program': 'Programme détaillé',
+            'dress_code': 'Code vestimentaire',
+            'welcome_message': 'Message de bienvenue',
+            'rsvp_deadline': 'Date limite de réponse',
+            'max_guests': "Nombre maximal d’invités",
+            'background_music': 'Musique de fond',
+            'allow_multiple_entries': 'Autoriser plusieurs entrées',
+        }
         widgets = {
             'event_date': forms.DateInput(attrs={'type': 'date'}),
             'event_time': forms.TimeInput(attrs={'type': 'time'}),

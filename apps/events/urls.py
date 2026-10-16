@@ -3,6 +3,7 @@ from django.urls import path
 from apps.events.views import (
     EventArchiveView,
     EventCreateView,
+    EventDashboardView,
     EventDetailView,
     EventListView,
     EventPublishView,
@@ -14,6 +15,7 @@ app_name = 'events'
 urlpatterns = [
     path('', EventListView.as_view(), name='list'),
     path('create/', EventCreateView.as_view(), name='create'),
+    path('<slug:slug>/dashboard/', EventDashboardView.as_view(), name='dashboard'),
     path('<slug:slug>/', EventDetailView.as_view(), name='detail'),
     path('<slug:slug>/edit/', EventUpdateView.as_view(), name='edit'),
     path('<slug:slug>/publish/', EventPublishView.as_view(), name='publish'),

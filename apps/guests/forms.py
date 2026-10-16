@@ -7,7 +7,7 @@ from apps.guests.models import Guest
 
 
 class GuestForm(StyledFormMixin, forms.ModelForm):
-    event = forms.ModelChoiceField(queryset=Event.objects.none())
+    event = forms.ModelChoiceField(queryset=Event.objects.none(), label='Événement')
 
     class Meta:
         model = Guest
@@ -21,6 +21,15 @@ class GuestForm(StyledFormMixin, forms.ModelForm):
             'reserved_table',
             'notes',
         ]
+        labels = {
+            'full_name': 'Nom complet',
+            'whatsapp_number': 'Numéro WhatsApp',
+            'email': 'Adresse e-mail',
+            'category': 'Catégorie',
+            'allowed_companions': "Nombre d’accompagnateurs autorisés",
+            'reserved_table': 'Table réservée',
+            'notes': 'Notes',
+        }
         widgets = {
             'notes': forms.Textarea(attrs={'rows': 4}),
         }
@@ -37,9 +46,13 @@ class GuestImportUploadForm(StyledFormMixin, forms.Form):
         ('upsert', 'Mettre a jour les doublons'),
     )
 
-    event = forms.ModelChoiceField(queryset=Event.objects.none())
-    file = forms.FileField()
-    import_mode = forms.ChoiceField(choices=IMPORT_MODE_CHOICES, initial='create_only')
+    event = forms.ModelChoiceField(queryset=Event.objects.none(), label='Événement')
+    file = forms.FileField(label='Fichier à importer')
+    import_mode = forms.ChoiceField(
+        choices=IMPORT_MODE_CHOICES,
+        initial='create_only',
+        label="Mode d’importation",
+    )
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user')
@@ -57,11 +70,11 @@ class GuestImportUploadForm(StyledFormMixin, forms.Form):
 class GuestImportMappingForm(StyledFormMixin, forms.Form):
     FIELD_LABELS = {
         'full_name': 'Nom complet',
-        'whatsapp_number': 'Numero WhatsApp',
+        'whatsapp_number': 'Numéro WhatsApp',
         'email': 'Email',
-        'category': 'Categorie',
-        'allowed_companions': 'Nombre d accompagnants',
-        'reserved_table': 'Table reservee',
+        'category': 'Catégorie',
+        'allowed_companions': "Nombre d’accompagnateurs",
+        'reserved_table': 'Table réservée',
         'notes': 'Notes',
     }
     REQUIRED_FIELDS = {'full_name', 'whatsapp_number'}

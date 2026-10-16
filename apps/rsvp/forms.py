@@ -8,6 +8,12 @@ class RSVPForm(StyledFormMixin, forms.ModelForm):
     class Meta:
         model = RSVP
         fields = ('response', 'companion_count', 'drink_preference', 'guest_message')
+        labels = {
+            'response': 'Votre réponse',
+            'companion_count': "Nombre d'accompagnateurs",
+            'drink_preference': 'Préférence de boisson',
+            'guest_message': 'Message aux organisateurs',
+        }
         widgets = {
             'drink_preference': forms.Select(
                 choices=(

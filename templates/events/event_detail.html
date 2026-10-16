@@ -17,6 +17,7 @@
                     <span class="rounded-full border border-white/10 bg-white/6 px-4 py-2 text-sm">{{ event.get_status_display }}</span>
                 </div>
                 <div class="flex flex-wrap gap-3">
+                    <a href="{% url 'events:dashboard' event.slug %}" class="btn-primary">Gérer l'événement</a>
                     <a href="{% url 'events:edit' event.slug %}" class="btn-secondary">Modifier</a>
                     <form method="post" action="{% url 'events:publish' event.slug %}">{% csrf_token %}<button class="btn-primary">Publier</button></form>
                     <form method="post" action="{% url 'events:archive' event.slug %}">{% csrf_token %}<button class="btn-secondary">Archiver</button></form>
@@ -41,7 +42,7 @@
             <div class="glass-card p-6">
                 <div class="flex items-center justify-between">
                     <h2 class="text-2xl font-semibold">Programme</h2>
-                    <a href="{% url 'guests:list' %}" class="text-sm text-rose-300">Voir les invites</a>
+                    <a href="{% url 'guests:list' %}?event={{ event.pk }}" class="text-sm text-rose-300">Voir les invités</a>
                 </div>
                 <div class="mt-6 space-y-4">
                     {% for item in event.program_items.all %}

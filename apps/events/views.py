@@ -8,6 +8,7 @@ from django.views.generic import CreateView, DetailView, ListView, UpdateView
 
 from apps.events.forms import EventForm
 from apps.events.models import Event, EventProgram, Gallery, Theme
+from apps.events.services import get_event_dashboard_data
 
 
 class OwnerEventMixin(LoginRequiredMixin):
@@ -33,6 +34,22 @@ class EventDetailView(OwnerEventMixin, DetailView):
     slug_field = 'slug'
     slug_url_kwarg = 'slug'
     context_object_name = 'event'
+
+
+class EventDashboardView(OwnerEventMixin, DetailView):
+    template_name = 'events/event_dashboard.html'
+    slug_field = 'slug'
+    slug_url_kwarg = 'slug'
+    context_object_name = 'event'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update(get_event_dashboard_data(self.object))
+        context['event_options'] = Event.objects.filter(owner=self.request.user).only(
+            'name',
+            'slug',
+        )
+        return context
 
 
 class EventCreateView(LoginRequiredMixin, CreateView):

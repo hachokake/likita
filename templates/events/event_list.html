@@ -27,7 +27,8 @@
                     <span>{{ event.guest_count }} invites</span>
                 </div>
                 <div class="mt-6 flex gap-3">
-                    <a href="{% url 'events:detail' event.slug %}" class="btn-primary">Ouvrir</a>
+                    <a href="{% url 'events:dashboard' event.slug %}" class="btn-primary">Gérer</a>
+                    <a href="{% url 'events:detail' event.slug %}" class="btn-secondary">Détails</a>
                     <a href="{% url 'events:edit' event.slug %}" class="btn-secondary">Modifier</a>
                 </div>
             </article>

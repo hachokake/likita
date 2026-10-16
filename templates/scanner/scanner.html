@@ -7,10 +7,11 @@
     <div class="glass-card p-6">
         <p class="text-xs uppercase tracking-[0.3em] text-white/40">Scanner</p>
         <h1 class="mt-2 text-4xl font-semibold">Controle d'acces QR</h1>
-        <p class="mt-3 text-white/60">Activez la camera si le navigateur supporte `BarcodeDetector`, sinon utilisez la saisie manuelle.</p>
-        <video id="scanner-video" class="mt-6 hidden w-full rounded-[28px] border border-white/10 bg-black/50" autoplay playsinline></video>
+        <p class="mt-3 text-white/60">Activez la caméra pour scanner un QR code ou utilisez la saisie manuelle.</p>
+        <div id="scanner-reader" class="mt-6 hidden overflow-hidden rounded-[28px] border border-white/10 bg-black/50"></div>
         <div class="mt-6 flex flex-wrap gap-3">
-            <button type="button" id="start-camera" class="btn-secondary">Activer la camera</button>
+            <button type="button" id="start-camera" class="btn-secondary">Activer la caméra</button>
+            <button type="button" id="stop-camera" class="btn-secondary hidden">Arrêter la caméra</button>
         </div>
         <form id="scan-form" class="mt-6 space-y-4">
             {% csrf_token %}
@@ -34,54 +35,108 @@
     </div>
 </section>
 
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <script>
 const form = document.getElementById('scan-form');
 const resultNode = document.getElementById('scan-result');
-const video = document.getElementById('scanner-video');
+const tokenInput = form.querySelector('input[name="token"]');
+const reader = document.getElementById('scanner-reader');
 const startButton = document.getElementById('start-camera');
+const stopButton = document.getElementById('stop-camera');
+let scanner = null;
+let isScanning = false;
+let isSubmitting = false;
+
+function showResult(message) {
+  resultNode.classList.remove('hidden');
+  resultNode.textContent = message;
+}
+
+async function stopCamera() {
+  if (!scanner || !isScanning) {
+    return;
+  }
+
+  isScanning = false;
+  try {
+    await scanner.stop();
+    await scanner.clear();
+  } catch (error) {
+    showResult("La caméra n'a pas pu être arrêtée correctement.");
+  } finally {
+    scanner = null;
+    reader.classList.add('hidden');
+    startButton.classList.remove('hidden');
+    stopButton.classList.add('hidden');
+  }
+}
 
 form.addEventListener('submit', async (event) => {
   event.preventDefault();
+  if (isSubmitting) {
+    return;
+  }
+
+  isSubmitting = true;
+  await stopCamera();
   const formData = new FormData(form);
-  const response = await fetch("{% url 'scanner:validate' %}", {
-    method: 'POST',
-    headers: { 'X-Requested-With': 'XMLHttpRequest' },
-    body: formData,
-  });
-  const payload = await response.json();
-  resultNode.classList.remove('hidden');
-  resultNode.innerHTML = `
-    <p class="text-lg font-semibold">${payload.message}</p>
-    <p class="mt-3 text-sm text-white/60">Nom: ${payload.guest.name || '-'}</p>
-    <p class="text-sm text-white/60">Categorie: ${payload.guest.category || '-'}</p>
-    <p class="text-sm text-white/60">Telephone: ${payload.guest.phone || '-'}</p>
-    <p class="text-sm text-white/60">Accompagnants: ${payload.guest.companions || 0}</p>
-    <p class="text-sm text-white/60">Heure d'arrivee: ${payload.guest.arrival_time || '-'}</p>
-  `;
+  try {
+    const response = await fetch("{% url 'scanner:validate' %}", {
+      method: 'POST',
+      headers: { 'X-Requested-With': 'XMLHttpRequest' },
+      body: formData,
+    });
+    const payload = await response.json();
+    resultNode.classList.remove('hidden');
+    resultNode.innerHTML = `
+      <p class="text-lg font-semibold">${payload.message}</p>
+      <p class="mt-3 text-sm text-white/60">Nom: ${payload.guest.name || '-'}</p>
+      <p class="text-sm text-white/60">Catégorie: ${payload.guest.category || '-'}</p>
+      <p class="text-sm text-white/60">Téléphone: ${payload.guest.phone || '-'}</p>
+      <p class="text-sm text-white/60">Accompagnants: ${payload.guest.companions || 0}</p>
+      <p class="text-sm text-white/60">Heure d'arrivée: ${payload.guest.arrival_time || '-'}</p>
+    `;
+  } catch (error) {
+    showResult("La validation du QR code a échoué. Vérifiez votre connexion et réessayez.");
+  } finally {
+    isSubmitting = false;
+  }
 });
 
 startButton.addEventListener('click', async () => {
-  if (!('BarcodeDetector' in window) || !navigator.mediaDevices) {
-    resultNode.classList.remove('hidden');
-    resultNode.textContent = 'Le navigateur ne supporte pas le scan natif. Utilisez la saisie manuelle.';
+  if (!navigator.mediaDevices || !window.Html5Qrcode) {
+    showResult("La caméra n'est pas disponible. Vérifiez les autorisations du navigateur ou utilisez la saisie manuelle.");
     return;
   }
-  const detector = new BarcodeDetector({ formats: ['qr_code'] });
-  const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-  video.srcObject = stream;
-  video.classList.remove('hidden');
 
-  const loop = async () => {
-    const codes = await detector.detect(video);
-    if (codes.length) {
-      form.querySelector('input[name="token"]').value = codes[0].rawValue;
-      form.requestSubmit();
-      stream.getTracks().forEach(track => track.stop());
-      return;
-    }
-    requestAnimationFrame(loop);
-  };
-  requestAnimationFrame(loop);
+  reader.classList.remove('hidden');
+  startButton.classList.add('hidden');
+  stopButton.classList.remove('hidden');
+  scanner = new Html5Qrcode('scanner-reader');
+
+  try {
+    await scanner.start(
+      { facingMode: 'environment' },
+      { fps: 10, qrbox: { width: 250, height: 250 } },
+      async (decodedText) => {
+        if (isSubmitting) {
+          return;
+        }
+        tokenInput.value = decodedText;
+        form.requestSubmit();
+      },
+      () => {},
+    );
+    isScanning = true;
+  } catch (error) {
+    scanner = null;
+    reader.classList.add('hidden');
+    startButton.classList.remove('hidden');
+    stopButton.classList.add('hidden');
+    showResult("Impossible d'activer la caméra. Autorisez son accès dans le navigateur, puis réessayez.");
+  }
 });
+
+stopButton.addEventListener('click', stopCamera);
 </script>
 {% endblock %}

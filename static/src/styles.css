@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@source "../../templates";
 
 @theme {
   --color-ink: #111415;
@@ -174,13 +175,6 @@
     .invitation-card__hero-content { padding: 3rem; }
     .invitation-card__body { padding: 2.25rem 3rem; }
     .invitation-details { grid-template-columns: repeat(2, 1fr); column-gap: 2rem; }
-  }
-
-  @media print {
-    body { background: white !important; }
-    body > * { display: none !important; }
-    #invitation-card { display: block !important; box-shadow: none; max-width: none; }
-    .invitation-card__hero { min-height: 58vh; }
   }
 
   .interactive-video {
