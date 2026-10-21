@@ -3,35 +3,66 @@
 {% block title %}Scanner QR | Likita{% endblock %}
 
 {% block content %}
-<section class="grid gap-6 lg:grid-cols-[1fr_0.95fr]" x-data="{result: null, scanning: false}">
-    <div class="glass-card p-6">
-        <p class="text-xs uppercase tracking-[0.3em] text-white/40">Scanner</p>
-        <h1 class="mt-2 text-4xl font-semibold">Controle d'acces QR</h1>
-        <p class="mt-3 text-white/60">Activez la caméra pour scanner un QR code ou utilisez la saisie manuelle.</p>
-        <div id="scanner-reader" class="mt-6 hidden overflow-hidden rounded-[28px] border border-white/10 bg-black/50"></div>
-        <div class="mt-6 flex flex-wrap gap-3">
-            <button type="button" id="start-camera" class="btn-secondary">Activer la caméra</button>
-            <button type="button" id="stop-camera" class="btn-secondary hidden">Arrêter la caméra</button>
+<section class="page">
+    <div class="page-head">
+        <div>
+            <p class="page-head__eyebrow">Scanner</p>
+            <h1>Contrôle d'accès</h1>
+            <p class="page-head__lead">Activez la caméra pour scanner le QR code d'un invité, ou collez son jeton pour une validation manuelle.</p>
         </div>
-        <form id="scan-form" class="mt-6 space-y-4">
-            {% csrf_token %}
-            <input type="text" name="token" placeholder="Collez ou scannez le token QR" class="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/35 focus:border-rose-500 focus:outline-none">
-            <button class="btn-primary w-full">Valider le QR code</button>
-        </form>
-        <div id="scan-result" class="mt-6 hidden rounded-3xl border border-white/10 bg-white/5 p-5"></div>
     </div>
-    <div class="glass-card p-6">
-        <h2 class="text-2xl font-semibold">Derniers scans</h2>
-        <div class="mt-6 space-y-4">
-            {% for scan in recent_scans %}
-                <div class="rounded-3xl border border-white/10 bg-white/5 p-4">
-                    <p class="font-semibold">{{ scan.guest.full_name|default:'Inconnu' }}</p>
-                    <p class="mt-2 text-sm text-white/60">{{ scan.event.name }} · {{ scan.get_status_display }}</p>
+
+    <div class="grid gap-6 xl:grid-cols-[1fr_0.9fr]">
+        <section class="panel">
+            <div class="panel__head">
+                <h2>Scanner</h2>
+                <div class="flex gap-2">
+                    <button type="button" id="start-camera" class="btn-sm btn-sm--primary">Activer la caméra</button>
+                    <button type="button" id="stop-camera" class="btn-sm btn-sm--ghost hidden">Arrêter</button>
                 </div>
-            {% empty %}
-                <p class="text-white/55">Aucun scan recent.</p>
-            {% endfor %}
-        </div>
+            </div>
+            <div class="panel__body grid gap-5">
+                <div id="scanner-reader" class="hidden overflow-hidden rounded-xl border border-white/10 bg-black"></div>
+
+                <form id="scan-form" class="grid gap-3">
+                    {% csrf_token %}
+                    <label for="scan-token" class="text-sm font-semibold text-white/80">Validation manuelle</label>
+                    <div class="flex flex-col gap-2 sm:flex-row">
+                        <input id="scan-token" type="text" name="token" placeholder="Collez le jeton du QR code" autocomplete="off" class="w-full rounded-md border border-white/15 bg-black/20 px-3.5 py-3 text-sm text-white placeholder:text-white/45 focus:border-rose-400 focus:outline-none">
+                        <button class="btn-primary shrink-0">Valider</button>
+                    </div>
+                </form>
+
+                <div id="scan-result" class="scan-result hidden" role="status" aria-live="assertive"></div>
+            </div>
+        </section>
+
+        <section class="panel">
+            <div class="panel__head">
+                <h2>Derniers scans</h2>
+                <a href="{% url 'dashboard:statistics' %}" class="panel__link">Historique complet</a>
+            </div>
+            <div class="panel__body">
+                {% if recent_scans %}
+                    <ul class="list">
+                        {% for scan in recent_scans %}
+                            <li class="list-item">
+                                <div>
+                                    <div class="flex flex-wrap items-center gap-2">
+                                        <span class="badge badge--{{ scan.status }}">{{ scan.get_status_display }}</span>
+                                        <strong>{{ scan.guest.full_name|default:"QR non reconnu" }}</strong>
+                                    </div>
+                                    <p>{{ scan.event.name }}</p>
+                                </div>
+                                <time datetime="{{ scan.scanned_at|date:'c' }}">{{ scan.scanned_at|date:"H:i" }}</time>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-sm text-white/55">Aucun scan pour le moment.</p>
+                {% endif %}
+            </div>
+        </section>
     </div>
 </section>
 
@@ -47,16 +78,36 @@ let scanner = null;
 let isScanning = false;
 let isSubmitting = false;
 
-function showResult(message) {
-  resultNode.classList.remove('hidden');
-  resultNode.textContent = message;
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+function showResult(message, ok = false, guest = null) {
+  resultNode.classList.remove('hidden', 'scan-result--ok', 'scan-result--ko');
+  resultNode.classList.add(ok ? 'scan-result--ok' : 'scan-result--ko');
+  let html = `<h3>${escapeHtml(message)}</h3>`;
+  if (guest && guest.name) {
+    html += `
+      <dl>
+        <dt>Nom</dt><dd>${escapeHtml(guest.name)}</dd>
+        <dt>Catégorie</dt><dd>${escapeHtml(guest.category || '—')}</dd>
+        <dt>Téléphone</dt><dd>${escapeHtml(guest.phone || '—')}</dd>
+        <dt>Accompagnants</dt><dd>${escapeHtml(guest.companions ?? 0)}</dd>
+        <dt>Arrivée</dt><dd>${escapeHtml(guest.arrival_time || '—')}</dd>
+      </dl>`;
+  }
+  resultNode.innerHTML = html;
+}
+
+function resetCameraUi() {
+  scanner = null;
+  reader.classList.add('hidden');
+  startButton.classList.remove('hidden');
+  stopButton.classList.add('hidden');
 }
 
 async function stopCamera() {
-  if (!scanner || !isScanning) {
-    return;
-  }
-
+  if (!scanner || !isScanning) return;
   isScanning = false;
   try {
     await scanner.stop();
@@ -64,40 +115,26 @@ async function stopCamera() {
   } catch (error) {
     showResult("La caméra n'a pas pu être arrêtée correctement.");
   } finally {
-    scanner = null;
-    reader.classList.add('hidden');
-    startButton.classList.remove('hidden');
-    stopButton.classList.add('hidden');
+    resetCameraUi();
   }
 }
 
 form.addEventListener('submit', async (event) => {
   event.preventDefault();
-  if (isSubmitting) {
-    return;
-  }
-
+  if (isSubmitting) return;
   isSubmitting = true;
   await stopCamera();
-  const formData = new FormData(form);
   try {
     const response = await fetch("{% url 'scanner:validate' %}", {
       method: 'POST',
       headers: { 'X-Requested-With': 'XMLHttpRequest' },
-      body: formData,
+      body: new FormData(form),
     });
     const payload = await response.json();
-    resultNode.classList.remove('hidden');
-    resultNode.innerHTML = `
-      <p class="text-lg font-semibold">${payload.message}</p>
-      <p class="mt-3 text-sm text-white/60">Nom: ${payload.guest.name || '-'}</p>
-      <p class="text-sm text-white/60">Catégorie: ${payload.guest.category || '-'}</p>
-      <p class="text-sm text-white/60">Téléphone: ${payload.guest.phone || '-'}</p>
-      <p class="text-sm text-white/60">Accompagnants: ${payload.guest.companions || 0}</p>
-      <p class="text-sm text-white/60">Heure d'arrivée: ${payload.guest.arrival_time || '-'}</p>
-    `;
+    showResult(payload.message, payload.ok, payload.guest);
+    if (payload.ok) tokenInput.value = '';
   } catch (error) {
-    showResult("La validation du QR code a échoué. Vérifiez votre connexion et réessayez.");
+    showResult('La validation a échoué. Vérifiez votre connexion et réessayez.');
   } finally {
     isSubmitting = false;
   }
@@ -105,23 +142,19 @@ form.addEventListener('submit', async (event) => {
 
 startButton.addEventListener('click', async () => {
   if (!navigator.mediaDevices || !window.Html5Qrcode) {
-    showResult("La caméra n'est pas disponible. Vérifiez les autorisations du navigateur ou utilisez la saisie manuelle.");
+    showResult("La caméra n'est pas disponible. Vérifiez les autorisations du navigateur ou utilisez la validation manuelle.");
     return;
   }
-
   reader.classList.remove('hidden');
   startButton.classList.add('hidden');
   stopButton.classList.remove('hidden');
   scanner = new Html5Qrcode('scanner-reader');
-
   try {
     await scanner.start(
       { facingMode: 'environment' },
       { fps: 10, qrbox: { width: 250, height: 250 } },
-      async (decodedText) => {
-        if (isSubmitting) {
-          return;
-        }
+      (decodedText) => {
+        if (isSubmitting) return;
         tokenInput.value = decodedText;
         form.requestSubmit();
       },
@@ -129,10 +162,7 @@ startButton.addEventListener('click', async () => {
     );
     isScanning = true;
   } catch (error) {
-    scanner = null;
-    reader.classList.add('hidden');
-    startButton.classList.remove('hidden');
-    stopButton.classList.add('hidden');
+    resetCameraUi();
     showResult("Impossible d'activer la caméra. Autorisez son accès dans le navigateur, puis réessayez.");
   }
 });

@@ -1,24 +1,26 @@
 {% extends 'base.html' %}
 
-{% block title %}Parametres | Likita{% endblock %}
+{% block title %}Paramètres | Likita{% endblock %}
 
 {% block content %}
-<section class="glass-card p-8">
-    <p class="text-xs uppercase tracking-[0.3em] text-white/40">Parametres utilisateur</p>
-    <h1 class="mt-3 text-3xl font-semibold">Configuration de l'espace</h1>
-    <div class="mt-8 grid gap-4 lg:grid-cols-3">
-        <div class="metric-card">
-            <p class="text-sm text-white/45">Langue</p>
-            <p class="mt-3 text-xl font-semibold">{{ request.user.settings.locale|default:'fr' }}</p>
-        </div>
-        <div class="metric-card">
-            <p class="text-sm text-white/45">Fuseau horaire</p>
-            <p class="mt-3 text-xl font-semibold">{{ request.user.settings.timezone|default:'Africa/Kinshasa' }}</p>
-        </div>
-        <div class="metric-card">
-            <p class="text-sm text-white/45">Alertes scan</p>
-            <p class="mt-3 text-xl font-semibold">{% if request.user.settings.scan_alerts %}Activees{% else %}Desactivees{% endif %}</p>
+<section class="page page--narrow">
+    <div class="page-head">
+        <div>
+            <p class="page-head__eyebrow"><a href="{% url 'accounts:profile' %}">Compte</a><span>/</span><span>Paramètres</span></p>
+            <h1>Paramètres</h1>
+            <p class="page-head__lead">Préférences de votre espace. La modification de ces réglages arrive prochainement.</p>
         </div>
     </div>
+
+    <section class="panel">
+        <div class="panel__head"><h2>Préférences</h2></div>
+        <div class="panel__body">
+            <dl class="dl">
+                <div><dt>Langue</dt><dd>{% if request.user.settings.locale == 'fr' or not request.user.settings.locale %}Français{% else %}{{ request.user.settings.locale }}{% endif %}</dd></div>
+                <div><dt>Fuseau horaire</dt><dd>{{ request.user.settings.timezone|default:"Africa/Kinshasa" }}</dd></div>
+                <div><dt>Alertes de scan</dt><dd>{% if request.user.settings.scan_alerts %}<span class="badge badge--allowed">Activées</span>{% else %}<span class="badge">Désactivées</span>{% endif %}</dd></div>
+            </dl>
+        </div>
+    </section>
 </section>
 {% endblock %}

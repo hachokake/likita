@@ -3,24 +3,26 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Indisponible temporairement | Likita</title>
+    <title>Erreur technique | Likita</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Space+Grotesk:wght@400;500&display=swap" rel="stylesheet">
     <style>
-        :root { color-scheme: light; }
         * { box-sizing: border-box; }
-        body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 1.5rem; background: #fff7ed; color: #1f2937; font-family: Georgia, serif; }
-        main { width: min(100%, 42rem); border-left: 8px solid #e11d48; padding: 2rem; background: #ffffff; box-shadow: 0 18px 50px rgba(69, 10, 10, 0.12); }
-        .code { margin: 0; color: #e11d48; font: 700 1rem/1.2 monospace; letter-spacing: 0.08em; }
-        h1 { margin: 0.5rem 0 1rem; font-size: clamp(2rem, 6vw, 4rem); line-height: 1; }
-        p { max-width: 36rem; font: 1.05rem/1.65 system-ui, sans-serif; }
-        a { display: inline-block; margin-top: 0.75rem; padding: 0.8rem 1.1rem; background: #e11d48; color: #fff; font: 700 0.95rem/1 system-ui, sans-serif; text-decoration: none; }
-        a:hover, a:focus { background: #be123c; }
+        body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 1.5rem; background: radial-gradient(circle at 80% 0%, rgba(197, 29, 50, 0.22), transparent 45%), linear-gradient(180deg, #15191a, #101314); color: #f4f6f7; font-family: "Space Grotesk", system-ui, sans-serif; }
+        main { width: min(100%, 34rem); text-align: center; }
+        .code { margin: 0; color: #fda4af; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.3em; text-transform: uppercase; }
+        h1 { margin: 1rem 0 0.75rem; font-family: "Sora", sans-serif; font-size: clamp(1.9rem, 5vw, 2.75rem); line-height: 1.1; letter-spacing: -0.02em; }
+        p { margin: 0 auto; max-width: 28rem; color: rgba(244, 246, 247, 0.65); line-height: 1.65; }
+        a { display: inline-flex; margin-top: 1.75rem; padding: 0.85rem 1.4rem; border-radius: 8px; background: #c51d32; color: #fff; font-weight: 600; text-decoration: none; transition: background 160ms ease; }
+        a:hover, a:focus { background: #e2334a; }
     </style>
 </head>
 <body>
     <main>
-        <p class="code">ERREUR 500</p>
-        <h1>Un incident temporaire est survenu.</h1>
-        <p>Revenez a l'accueil et reessayez dans quelques instants. Notre equipe peut consulter les journaux techniques pour corriger le probleme.</p>
+        <p class="code">Erreur 500</p>
+        <h1>Une erreur technique est survenue.</h1>
+        <p>Nos équipes sont informées. Réessayez dans quelques instants ou revenez à l'accueil.</p>
         <a href="/">Retour a l accueil</a>
     </main>
 </body>

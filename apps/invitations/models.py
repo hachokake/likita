@@ -1,6 +1,7 @@
 from django.db import models
 from django.urls import reverse
 from django.utils.crypto import get_random_string
+from django.utils.formats import date_format
 from urllib.parse import quote
 
 from apps.core.models import TimeStampedUUIDModel
@@ -65,14 +66,33 @@ class Invitation(TimeStampedUUIDModel):
 		event = self.event
 		base_url = normalize_absolute_base_url(absolute_url)
 		link = f"{base_url}{self.get_absolute_url()}"
-		return (
-			f"Bonjour {self.guest.full_name}\n\n"
-			f"{event.host_names} ont le plaisir de vous inviter a {event.name}.\n\n"
-			f"Date : {event.event_date:%d/%m/%Y} a {event.event_time:%Hh%M}\n"
-			f"Lieu : {event.address}\n\n"
-			f"Votre invitation personnelle (cliquez ici) :\n{link}\n\n"
-			f"Merci de confirmer votre presence."
-		)
+		date_label = date_format(event.event_date, 'l j F Y')
+		time_label = f"{event.event_time:%Hh%M}"
+		lines = [
+			f"Bonjour {self.guest.full_name},",
+			"",
+			f"{event.host_names} ont le plaisir de vous inviter à :",
+			f"*{event.name}*",
+			"",
+			f"📅 {date_label} à {time_label}",
+			f"📍 {event.address}",
+		]
+		if event.dress_code:
+			lines.append(f"👔 Tenue : {event.dress_code}")
+		lines += [
+			"",
+			"Votre invitation personnelle :",
+			link,
+			"",
+		]
+		if event.rsvp_deadline:
+			lines.append(
+				f"Merci de confirmer votre présence sur ce lien avant le {date_format(event.rsvp_deadline, 'j F Y')}."
+			)
+		else:
+			lines.append("Merci de confirmer votre présence directement sur ce lien.")
+		lines.append("À très bientôt !")
+		return "\n".join(lines)
 
 	@property
 	def whatsapp_share_url(self):

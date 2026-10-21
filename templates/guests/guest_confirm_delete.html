@@ -1,17 +1,20 @@
 {% extends 'base.html' %}
 
-{% block title %}Supprimer | Likita{% endblock %}
+{% block title %}Supprimer un invité | Likita{% endblock %}
 
 {% block content %}
-<section class="mx-auto max-w-xl">
-    <div class="glass-card p-8">
-        <h1 class="text-3xl font-semibold">Supprimer {{ object.full_name }} ?</h1>
-        <p class="mt-4 text-white/60">Cette action supprimera aussi les donnees liees a l'invitation, au RSVP et au QR code.</p>
-        <form method="post" class="mt-8 flex gap-3">
-            {% csrf_token %}
-            <button type="submit" class="btn-primary">Confirmer</button>
-            <a href="{% url 'guests:detail' object.pk %}" class="btn-secondary">Annuler</a>
-        </form>
+<section class="page page--narrow" style="max-width: 36rem;">
+    <div class="page-head">
+        <div>
+            <p class="page-head__eyebrow"><a href="{% url 'guests:list' %}">Invités</a><span>/</span><a href="{% url 'guests:detail' object.pk %}">{{ object.full_name }}</a></p>
+            <h1>Supprimer « {{ object.full_name }} » ?</h1>
+            <p class="page-head__lead">L'invitation, la réponse RSVP et le QR code de cet invité seront définitivement supprimés. Cette action est irréversible.</p>
+        </div>
     </div>
+    <form method="post" class="panel panel__body form-actions">
+        {% csrf_token %}
+        <a href="{% url 'guests:detail' object.pk %}" class="cancel">Annuler</a>
+        <button type="submit" class="btn-danger">Supprimer définitivement</button>
+    </form>
 </section>
 {% endblock %}

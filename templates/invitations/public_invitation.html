@@ -1,578 +1,294 @@
 {% extends 'invitations/public_base.html' %}
 
-{% block title %}Invitation | {{ invitation.event.name }}{% endblock %}
+{% block title %}Invitation · {{ event.name }}{% endblock %}
+
+{% block meta %}
+<meta property="og:title" content="{{ event.name }} — Invitation pour {{ guest.full_name }}">
+<meta property="og:description" content="{{ event.host_names }} vous invitent le {{ event.event_date|date:'j F Y' }} à {{ event.event_time|time:'H:i' }} · {{ event.address }}">
+{% if event.cover_image %}<meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{{ event.cover_image.url }}">{% endif %}
+{% endblock %}
 
 {% block content %}
+<main class="inv-page">
 
-<section class="invitation-page min-h-screen bg-[#f7f2ed] px-4 py-8 text-[#302626] sm:px-6 sm:py-12 lg:px-8">
+    <header class="inv-top">
+        <p class="inv-kicker">Invitation personnelle</p>
+        <div class="inv-rule"></div>
+        <p>De la part de {{ event.host_names }}</p>
+    </header>
 
-    <div class="mx-auto max-w-6xl">
+    {% if response_saved and accepted %}
+        <div class="inv-notice inv-notice--ok" role="status">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg>
+            <span><strong>Merci, votre présence est confirmée.</strong> Voici votre carte d'accès personnelle : présentez le QR code à l'entrée le jour J.</span>
+        </div>
+    {% elif response_saved %}
+        <div class="inv-notice inv-notice--info" role="status">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4m0 4h.01"/></svg>
+            <span>Votre réponse a bien été enregistrée. Merci de nous avoir prévenus — vous pouvez la modifier à tout moment depuis cette page.</span>
+        </div>
+    {% elif form_has_errors %}
+        <div class="inv-notice inv-notice--error" role="alert">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4m0 4h.01"/></svg>
+            <span>Votre réponse n'a pas pu être enregistrée. <a href="#confirmation" style="color:inherit;font-weight:600;">Vérifiez le formulaire</a> ci-dessous.</span>
+        </div>
+    {% endif %}
 
-        <!-- INTRODUCTION DE LA PAGE -->
-        <header class="mb-8 text-center sm:mb-10">
-            <p class="text-xs font-semibold uppercase tracking-[0.35em] text-[#895b64]">
-                Invitation personnelle
-            </p>
+    {% if show_invitation_pass %}
+    <section id="pass" class="inv-pass-wrap" aria-labelledby="pass-title">
+        <div class="inv-pass" id="pass-card">
+            {% if event.cover_image %}
+                <img src="{{ event.cover_image.url }}" alt="" class="inv-pass__cover" crossorigin="anonymous">
+            {% else %}
+                <div class="inv-pass__fallback" aria-hidden="true"></div>
+            {% endif %}
+            <div class="inv-pass__veil" aria-hidden="true"></div>
 
-            <div class="mx-auto mt-4 h-px w-16 bg-[#b68a83]"></div>
-
-            <p class="mt-4 text-sm text-[#81716c]">
-                Un moment précieux mérite une invitation particulière.
-            </p>
-        </header>
-
-        {% if show_invitation_pass %}
-            <section id="invitation-pass" class="invitation-pass-shell scroll-mt-6" aria-labelledby="invitation-pass-title">
-                <div class="invitation-pass">
-                    {% if invitation.event.cover_image %}
-                        <img
-                            src="{{ invitation.event.cover_image.url }}"
-                            alt=""
-                            class="invitation-pass__cover"
-                        >
-                    {% else %}
-                        <div class="invitation-pass__fallback" aria-hidden="true"></div>
-                    {% endif %}
-                    <div class="invitation-pass__veil" aria-hidden="true"></div>
-
-                    <div class="invitation-pass__content">
-                        <div>
-                            <p class="invitation-pass__eyebrow">Invitation officielle · {{ invitation.event.host_names }}</p>
-                            <h2 id="invitation-pass-title" class="invitation-pass__event">
-                                {{ invitation.event.name }}
-                            </h2>
-                        </div>
-
-                        <div>
-                            <p class="invitation-pass__guest-label">Invité(e) d'honneur</p>
-                            <p class="invitation-pass__guest">{{ invitation.guest.full_name }}</p>
-                            <div class="invitation-pass__details">
-                                <span>{{ invitation.event.event_date|date:'d F Y' }} · {{ invitation.event.event_time|time:'H:i' }}</span>
-                                <span>{{ invitation.event.address }}</span>
-                                {% if invitation.guest.reserved_table %}
-                                    <span>Table {{ invitation.guest.reserved_table }}</span>
-                                {% endif %}
-                            </div>
-                        </div>
+            <div class="inv-pass__main">
+                <div>
+                    <p class="inv-pass__eyebrow">Carte d'accès · {{ event.host_names }}</p>
+                    <h2 id="pass-title" class="inv-pass__title">{{ event.name }}</h2>
+                </div>
+                <div>
+                    <p class="inv-pass__label">Invité(e)</p>
+                    <p class="inv-pass__guest">{{ guest.full_name }}</p>
+                    <div class="inv-pass__meta">
+                        <span>{{ event.event_date|date:'j F Y' }} · {{ event.event_time|time:'H:i' }}</span>
+                        <span>{{ event.address }}</span>
+                        {% if guest.reserved_table %}<span>Table {{ guest.reserved_table }}</span>{% endif %}
+                        {% if rsvp.companion_count %}<span>{{ rsvp.companion_count }} accompagnant{{ rsvp.companion_count|pluralize }}</span>{% endif %}
                     </div>
-
-                    <aside class="invitation-pass__qr-column" aria-label="Code QR d'accès">
-                        <div class="invitation-pass__qr-frame">
-                            <img
-                                src="{{ invitation.guest.qrcode.image.url }}"
-                                alt="Code QR d'accès personnel de {{ invitation.guest.full_name }}"
-                            >
-                        </div>
-                        <p class="invitation-pass__scan">Scannez à l'entrée</p>
-                        <p class="invitation-pass__code">Pass personnel · Non transférable</p>
-                    </aside>
                 </div>
+            </div>
 
-                <div class="invitation-pass-actions invitation-page-tools">
-                    <button type="button" class="invitation-pass-print" onclick="window.print()">
-                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-                            <path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
-                            <path d="M6 14h12v7H6z"></path>
-                        </svg>
-                        Imprimer ou enregistrer en PDF
-                    </button>
+            <aside class="inv-pass__stub" aria-label="QR code d'accès">
+                <div class="inv-pass__qr"><img src="{{ qr_code.image.url }}" alt="QR code d'accès de {{ guest.full_name }}" crossorigin="anonymous"></div>
+                <p class="inv-pass__scan">À scanner à l'entrée</p>
+                <p class="inv-pass__code">Pass personnel · non transférable</p>
+            </aside>
+        </div>
+
+        <div class="inv-pass-actions">
+            <button type="button" class="inv-btn inv-btn--primary" id="download-pass" data-filename="carte-{{ event.name|slugify }}-{{ guest.full_name|slugify }}.png">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+                Enregistrer ma carte
+            </button>
+            <a href="{{ calendar_url }}" target="_blank" rel="noopener noreferrer" class="inv-btn inv-btn--ghost">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18M12 14v4m-2-2h4"/></svg>
+                Ajouter à mon agenda
+            </a>
+            <button type="button" class="inv-btn inv-btn--ghost" onclick="window.print()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v7H6z"/></svg>
+                Imprimer
+            </button>
+        </div>
+    </section>
+    {% endif %}
+
+    <article class="inv-card">
+        <div class="inv-cover">
+            {% if event.cover_image %}
+                <img src="{{ event.cover_image.url }}" alt="" class="inv-cover__img">
+            {% else %}
+                <div class="inv-cover__fallback" aria-hidden="true"></div>
+            {% endif %}
+            <div class="inv-cover__veil" aria-hidden="true"></div>
+
+            <div class="inv-cover__inner">
+                <span class="inv-chip">Vous êtes cordialement invité(e)</span>
+                <p class="inv-cover__hosts">{{ event.host_names }}</p>
+                <h1>{{ event.name }}</h1>
+                <div class="inv-ornament" aria-hidden="true">✦</div>
+                {% if event.welcome_message or event.description %}
+                    <p class="inv-cover__message">{{ event.welcome_message|default:event.description|linebreaksbr }}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="inv-body">
+            <div class="inv-greeting">
+                <p>Cher(e) {{ guest.full_name }},</p>
+                <p>C'est avec un immense plaisir que nous vous invitons à partager ce moment avec nous{% if guest.allowed_companions %}, accompagné(e) de {{ guest.allowed_companions }} personne{{ guest.allowed_companions|pluralize }} au maximum{% endif %}.</p>
+            </div>
+
+            <div class="inv-sep" aria-hidden="true">✦</div>
+
+            <div class="inv-details">
+                <div>
+                    <span class="inv-detail__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg></span>
+                    <p class="inv-detail__label">Date</p>
+                    <p class="inv-detail__value">{{ event.event_date|date:'l j F Y' }}</p>
                 </div>
-            </section>
+                <div>
+                    <span class="inv-detail__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
+                    <p class="inv-detail__label">Heure</p>
+                    <p class="inv-detail__value">{{ event.event_time|time:'H:i' }}</p>
+                </div>
+                <div>
+                    <span class="inv-detail__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg></span>
+                    <p class="inv-detail__label">Lieu</p>
+                    <p class="inv-detail__value">{{ event.address }}</p>
+                </div>
+                <div>
+                    <span class="inv-detail__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 1.9 4.6L19 9l-4.1 1.4L12 15l-2.9-4.6L5 9l5.1-1.4L12 3Z"/></svg></span>
+                    <p class="inv-detail__label">Tenue</p>
+                    <p class="inv-detail__value">{{ event.dress_code|default:'Libre' }}</p>
+                </div>
+            </div>
+
+            <div class="inv-actions">
+                {% if event.google_maps_url %}
+                    <a href="{{ event.google_maps_url }}" target="_blank" rel="noopener noreferrer" class="inv-btn inv-btn--ghost">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg>
+                        Voir l'itinéraire
+                    </a>
+                {% endif %}
+                {% if not show_invitation_pass %}
+                    <a href="{{ calendar_url }}" target="_blank" rel="noopener noreferrer" class="inv-btn inv-btn--ghost">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18M12 14v4m-2-2h4"/></svg>
+                        Ajouter à mon agenda
+                    </a>
+                    <a href="#confirmation" class="inv-btn inv-btn--primary">{% if has_responded %}Modifier ma réponse{% else %}Confirmer ma présence{% endif %} →</a>
+                {% endif %}
+            </div>
+        </div>
+    </article>
+
+    <div class="inv-grid">
+        {% if program_items or event.detailed_program %}
+        <section class="inv-panel">
+            <p class="inv-panel__kicker">Les moments à partager</p>
+            <h2>Le programme</h2>
+            {% if program_items %}
+                <ol class="inv-timeline">
+                    {% for item in program_items %}
+                        <li>
+                            <time datetime="{{ item.start_at|date:'c' }}">{{ item.start_at|date:'H:i' }}</time>
+                            <div>
+                                <h3>{{ item.title }}</h3>
+                                {% if item.description %}<p>{{ item.description }}</p>{% endif %}
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ol>
+                {% if event.detailed_program %}<div class="inv-prose">{{ event.detailed_program|linebreaksbr }}</div>{% endif %}
+            {% else %}
+                <div class="inv-prose">{{ event.detailed_program|linebreaksbr }}</div>
+            {% endif %}
+        </section>
         {% endif %}
 
-
-        <!-- CARTE PRINCIPALE DE L'INVITATION -->
-        <article
-            id="invitation-card"
-            class="mx-auto max-w-5xl overflow-hidden rounded-[28px] bg-white shadow-[0_25px_80px_rgba(62,36,35,0.12)] ring-1 ring-black/5"
-        >
-
-            <!-- COUVERTURE -->
-            <div class="relative isolate flex min-h-[390px] items-end overflow-hidden bg-[#593b40] sm:min-h-[480px] lg:min-h-[540px]">
-
-                {% if invitation.event.cover_image %}
-
-                    <img
-                        src="{{ invitation.event.cover_image.url }}"
-                        alt="{{ invitation.event.name }}"
-                        class="absolute inset-0 -z-20 h-full w-full object-cover"
-                    >
-
-                {% else %}
-
-                    <div class="absolute inset-0 -z-20 bg-gradient-to-br from-[#8b6268] via-[#64454a] to-[#38292d]"></div>
-
-                    <div class="absolute inset-0 -z-10 opacity-30">
-                        <div class="absolute -left-20 -top-20 h-72 w-72 rounded-full border border-white/30"></div>
-                        <div class="absolute -left-12 -top-12 h-56 w-56 rounded-full border border-white/20"></div>
-                        <div class="absolute -bottom-28 -right-10 h-80 w-80 rounded-full border border-white/30"></div>
-                    </div>
-
-                {% endif %}
-
-                <!-- VOILE DE LECTURE -->
-                <div class="absolute inset-0 -z-10 bg-gradient-to-t from-[#211416]/90 via-[#211416]/35 to-[#211416]/10"></div>
-
-                <!-- CONTENU DE LA COUVERTURE -->
-                <div class="w-full px-6 pb-10 pt-16 text-center text-white sm:px-12 sm:pb-14 lg:px-20">
-
-                    <span class="inline-flex items-center rounded-full border border-white/35 bg-white/10 px-5 py-2 text-[10px] font-medium uppercase tracking-[0.3em] backdrop-blur-sm sm:text-xs">
-                        Vous êtes cordialement invité(e)
-                    </span>
-
-                    <p class="mb-4 mt-8 text-xs uppercase tracking-[0.35em] text-white/80 sm:text-sm">
-                        {{ invitation.event.host_names }}
-                    </p>
-
-                    <h1 class="mx-auto max-w-3xl font-serif text-4xl font-medium leading-tight tracking-tight sm:text-5xl lg:text-7xl">
-                        {{ invitation.event.name }}
-                    </h1>
-
-                    <div class="mx-auto my-6 flex items-center justify-center gap-3">
-                        <span class="h-px w-10 bg-white/60"></span>
-                        <span class="text-lg text-[#e8c6b2]" aria-hidden="true">✦</span>
-                        <span class="h-px w-10 bg-white/60"></span>
-                    </div>
-
-                    {% if invitation.event.welcome_message or invitation.event.description %}
-                        <p class="mx-auto max-w-2xl text-sm leading-7 text-white/85 sm:text-base sm:leading-8">
-                            {{ invitation.event.welcome_message|default:invitation.event.description|linebreaksbr }}
-                        </p>
-                    {% endif %}
-
-                </div>
-            </div>
-
-
-            <!-- INFORMATIONS DE L'INVITATION -->
-            <div class="px-6 py-9 sm:px-10 sm:py-12 lg:px-14">
-
-                <div class="mx-auto mb-9 max-w-2xl text-center">
-
-                    <p class="font-serif text-2xl leading-relaxed text-[#563c40] sm:text-3xl">
-                        Cher(e) {{ invitation.guest.full_name }}
-                    </p>
-
-                    <p class="mt-3 text-sm leading-7 text-[#81716c] sm:text-base">
-                        C'est avec un immense plaisir que nous vous invitons
-                        à partager avec nous ce moment exceptionnel.
-                    </p>
-
-                </div>
-
-
-                <!-- SÉPARATEUR DÉCORATIF -->
-                <div class="mb-8 flex items-center justify-center gap-4">
-                    <span class="h-px flex-1 bg-[#e8ded6]"></span>
-                    <span class="text-sm text-[#a47b76]" aria-hidden="true">✦</span>
-                    <span class="h-px flex-1 bg-[#e8ded6]"></span>
-                </div>
-
-
-                <!-- DÉTAILS DE L'ÉVÉNEMENT -->
-                <div class="grid grid-cols-1 gap-7 sm:grid-cols-2 lg:grid-cols-4 lg:gap-5">
-
-                    <div class="text-center">
-                        <div class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-[#f7efeb] text-[#895b64]">
-                            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-                                <rect x="3" y="5" width="18" height="16" rx="2"></rect>
-                                <path d="M16 3v4M8 3v4M3 10h18"></path>
-                            </svg>
-                        </div>
-
-                        <p class="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#9b8580]">
-                            Date
-                        </p>
-
-                        <p class="mt-2 font-serif text-lg text-[#493537]">
-                            {{ invitation.event.event_date|date:'l d F Y' }}
-                        </p>
-                    </div>
-
-
-                    <div class="text-center">
-                        <div class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-[#f7efeb] text-[#895b64]">
-                            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-                                <circle cx="12" cy="12" r="9"></circle>
-                                <path d="M12 7v5l3 2"></path>
-                            </svg>
-                        </div>
-
-                        <p class="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#9b8580]">
-                            Heure
-                        </p>
-
-                        <p class="mt-2 font-serif text-lg text-[#493537]">
-                            {{ invitation.event.event_time|time:'H:i' }}
-                        </p>
-                    </div>
-
-
-                    <div class="text-center">
-                        <div class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-[#f7efeb] text-[#895b64]">
-                            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-                                <path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z"></path>
-                                <circle cx="12" cy="10" r="2.5"></circle>
-                            </svg>
-                        </div>
-
-                        <p class="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#9b8580]">
-                            Lieu
-                        </p>
-
-                        <p class="mt-2 font-serif text-lg text-[#493537]">
-                            {{ invitation.event.address }}
-                        </p>
-                    </div>
-
-
-                    <div class="text-center">
-                        <div class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-[#f7efeb] text-[#895b64]">
-                            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-                                <path d="M12 3v18M5 7h14M7 7l-3 6h6L7 7ZM17 7l-3 6h6l-3-6Z"></path>
-                            </svg>
-                        </div>
-
-                        <p class="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#9b8580]">
-                            Tenue
-                        </p>
-
-                        <p class="mt-2 font-serif text-lg text-[#493537]">
-                            {{ invitation.event.dress_code|default:'Libre' }}
-                        </p>
-                    </div>
-
-                </div>
-
-
-                <!-- ACCÈS AU LIEU -->
-                {% if invitation.event.google_maps_url %}
-
-                    <div class="mt-10 text-center">
-                        <a
-                            href="{{ invitation.event.google_maps_url }}"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            class="inline-flex items-center justify-center gap-3 rounded-full border border-[#d9c4bd] px-6 py-3 text-xs font-semibold uppercase tracking-[0.15em] text-[#70454e] transition duration-300 hover:border-[#70454e] hover:bg-[#70454e] hover:text-white"
-                        >
-                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
-                                <path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z"></path>
-                                <circle cx="12" cy="10" r="2.5"></circle>
-                            </svg>
-
-                            Voir l'itinéraire
-                        </a>
-                    </div>
-
-                {% endif %}
-
-            </div>
-
-        </article>
-
-
-        <!-- ACTIONS DE L'INVITÉ -->
-        <div class="invitation-page-tools mx-auto mt-7 flex max-w-5xl flex-col justify-center gap-3 sm:flex-row">
-
-            <button
-                type="button"
-                onclick="window.print()"
-                class="inline-flex items-center justify-center rounded-full border border-[#d9c8c0] bg-white px-6 py-3.5 text-sm font-medium text-[#62484a] shadow-sm transition duration-300 hover:bg-[#f8eee9]"
-            >
-                Télécharger ma carte
-            </button>
-
-            <a
-                href="#confirmation"
-                class="inline-flex items-center justify-center rounded-full bg-[#70454e] px-7 py-3.5 text-sm font-semibold text-white shadow-lg shadow-[#70454e]/15 transition duration-300 hover:bg-[#59363e]"
-            >
-                Confirmer ma présence
-                <span class="ml-2" aria-hidden="true">→</span>
-            </a>
-
-        </div>
-
-
-        <!-- PROGRAMME ET CONFIRMATION -->
-        <div class="invitation-page-extra mx-auto mt-12 grid max-w-5xl grid-cols-1 items-start gap-6 lg:grid-cols-2 lg:gap-8">
-
-
-            <!-- PROGRAMME DE L'ÉVÉNEMENT -->
-            <section class="rounded-[24px] border border-[#e9ddd5] bg-white p-6 shadow-[0_12px_35px_rgba(62,36,35,0.05)] sm:p-8">
-
-                <div class="mb-7">
-                    <p class="text-[10px] font-semibold uppercase tracking-[0.3em] text-[#a47b76]">
-                        Les moments à partager
-                    </p>
-
-                    <h2 class="mt-3 font-serif text-3xl text-[#493537]">
-                        Le programme
-                    </h2>
-
-                    <p class="mt-3 text-sm leading-6 text-[#857671]">
-                        Découvrez les moments qui rythmeront cette journée.
-                    </p>
-                </div>
-
-
-                <div class="space-y-6">
-
-                    {% for item in invitation.event.program_items.all %}
-
-                        <div class="relative flex gap-4">
-
-                            <!-- REPÈRE VISUEL -->
-                            <div class="flex flex-col items-center">
-                                <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#f7efeb] text-[11px] font-semibold text-[#895b64]">
-                                    {{ item.start_at|date:'H:i' }}
-                                </span>
-
-                                {% if not forloop.last %}
-                                    <span class="mt-2 min-h-8 w-px flex-1 bg-[#e6d5ce]"></span>
-                                {% endif %}
-                            </div>
-
-
-                            <!-- DÉTAIL DE L'ÉTAPE -->
-                            <div class="flex-1 pb-2 pt-1">
-
-                                <h3 class="font-serif text-xl text-[#493537]">
-                                    {{ item.title }}
-                                </h3>
-
-                                {% if item.description %}
-
-                                    <p class="mt-2 text-sm leading-6 text-[#857671]">
-                                        {{ item.description }}
-                                    </p>
-
-                                {% endif %}
-
-                            </div>
-
-                        </div>
-
-                    {% empty %}
-
-                        <div class="rounded-2xl bg-[#faf6f2] p-5">
-
-                            <p class="text-sm leading-7 text-[#857671]">
-                                {{ invitation.event.detailed_program|default:'Le programme détaillé vous sera communiqué par les organisateurs.'|linebreaksbr }}
-                            </p>
-
-                        </div>
-
-                    {% endfor %}
-
-                </div>
-
-            </section>
-
-
-
-            <!-- FORMULAIRE DE CONFIRMATION -->
-            <section
-                id="confirmation"
-                class="scroll-mt-8 rounded-[24px] border border-[#e9ddd5] bg-white p-6 shadow-[0_12px_35px_rgba(62,36,35,0.05)] sm:p-8"
-            >
-
-                <div class="mb-7">
-                    {% if response_saved and not show_invitation_pass %}
-                        <div class="mb-6 rounded-2xl border border-[#ded5cf] bg-[#faf7f4] px-5 py-4 text-center text-sm font-medium text-[#654f50]" role="status">
-                            Votre réponse a bien été enregistrée. Merci de nous avoir informés.
-                        </div>
-                    {% endif %}
-
-                    <p class="text-[10px] font-semibold uppercase tracking-[0.3em] text-[#a47b76]">
-                        Votre réponse
-                    </p>
-
-                    <h2 class="mt-3 font-serif text-3xl text-[#493537]">
-                        Serez-vous des nôtres ?
-                    </h2>
-
-                    <p class="mt-3 text-sm leading-6 text-[#857671]">
-                        Merci de confirmer votre présence afin de nous aider à préparer votre accueil.
-                    </p>
-
-                </div>
-
-
-                <form
-                    method="post"
-                    action="{% url 'rsvp:respond' invitation.token %}"
-                    class="space-y-5"
-                >
-
-                    {% csrf_token %}
-
-
-                    <!-- RÉPONSE -->
-                    <div>
-
-                        <label
-                            for="response"
-                            class="mb-2 block text-sm font-medium text-[#594547]"
-                        >
-                            Votre présence <span class="text-[#ad6b75]">*</span>
-                        </label>
-
-                        <select
-                            id="response"
-                            name="response"
-                            required
-                            class="w-full rounded-xl border border-[#e5d9d2] bg-[#fcfaf8] px-4 py-3.5 text-sm text-[#493537] outline-none transition focus:border-[#a47b76] focus:ring-2 focus:ring-[#a47b76]/15"
-                        >
-
-                            <option
-                                value="accepted"
-                                {% if invitation.guest.rsvp.response == 'accepted' %}selected{% endif %}
-                            >
-                                Oui, je serai présent(e)
-                            </option>
-
-                            <option
-                                value="declined"
-                                {% if invitation.guest.rsvp.response == 'declined' %}selected{% endif %}
-                            >
-                                Non, je ne pourrai pas venir
-                            </option>
-
-                        </select>
-
-                    </div>
-
-
-                    <!-- BOISSON -->
-                    <div>
-
-                        <label
-                            for="drink_preference"
-                            class="mb-2 block text-sm font-medium text-[#594547]"
-                        >
-                            Votre boisson préférée
-                        </label>
-
-                        <select
-                            id="drink_preference"
-                            name="drink_preference"
-                            class="w-full rounded-xl border border-[#e5d9d2] bg-[#fcfaf8] px-4 py-3.5 text-sm text-[#493537] outline-none transition focus:border-[#a47b76] focus:ring-2 focus:ring-[#a47b76]/15"
-                        >
-
-                            <option value="">
-                                Aucune préférence
-                            </option>
-
-                            <option value="Eau" {% if invitation.guest.rsvp.drink_preference == 'Eau' %}selected{% endif %}>
-                                Eau
-                            </option>
-
-                            <option value="Jus" {% if invitation.guest.rsvp.drink_preference == 'Jus' %}selected{% endif %}>
-                                Jus de fruits
-                            </option>
-
-                            <option value="Soda" {% if invitation.guest.rsvp.drink_preference == 'Soda' %}selected{% endif %}>
-                                Soda
-                            </option>
-
-                            <option value="Vin" {% if invitation.guest.rsvp.drink_preference == 'Vin' %}selected{% endif %}>
-                                Vin
-                            </option>
-
-                            <option value="Biere" {% if invitation.guest.rsvp.drink_preference == 'Biere' %}selected{% endif %}>
-                                Bière
-                            </option>
-
-                            <option value="Cocktail sans alcool" {% if invitation.guest.rsvp.drink_preference == 'Cocktail sans alcool' %}selected{% endif %}>
-                                Cocktail sans alcool
-                            </option>
-
-                        </select>
-
-                    </div>
-
-
-                    <!-- ACCOMPAGNANTS -->
-                    <div>
-
-                        <label
-                            for="companion_count"
-                            class="mb-2 block text-sm font-medium text-[#594547]"
-                        >
-                            Nombre d'accompagnants
-                        </label>
-
-                        <input
-                            id="companion_count"
-                            type="number"
-                            name="companion_count"
-                            min="0"
-                            value="{{ invitation.guest.rsvp.companion_count }}"
-                            class="w-full rounded-xl border border-[#e5d9d2] bg-[#fcfaf8] px-4 py-3.5 text-sm text-[#493537] outline-none transition focus:border-[#a47b76] focus:ring-2 focus:ring-[#a47b76]/15"
-                        >
-
-                    </div>
-
-
-                    <!-- MESSAGE -->
-                    <div>
-
-                        <label
-                            for="guest_message"
-                            class="mb-2 block text-sm font-medium text-[#594547]"
-                        >
-                            Un message pour les organisateurs
-                        </label>
-
-                        <textarea
-                            id="guest_message"
-                            name="guest_message"
-                            rows="4"
-                            placeholder="Écrivez votre petit mot ici..."
-                            class="w-full resize-y rounded-xl border border-[#e5d9d2] bg-[#fcfaf8] px-4 py-3.5 text-sm leading-6 text-[#493537] outline-none transition placeholder:text-[#b4a49c] focus:border-[#a47b76] focus:ring-2 focus:ring-[#a47b76]/15"
-                        >{{ invitation.guest.rsvp.guest_message }}</textarea>
-
-                    </div>
-
-
-                    <!-- VALIDATION -->
-                    <button
-                        type="submit"
-                        class="flex w-full items-center justify-center gap-3 rounded-xl bg-[#70454e] px-5 py-4 text-sm font-semibold text-white shadow-lg shadow-[#70454e]/15 transition duration-300 hover:bg-[#59363e] focus:outline-none focus:ring-2 focus:ring-[#70454e]/40 focus:ring-offset-2"
-                    >
-                        Enregistrer ma réponse
-                        <span aria-hidden="true">→</span>
-                    </button>
-
-
-                    <p class="text-center text-xs leading-5 text-[#a08e86]">
-                        Nous vous remercions de votre réponse et avons hâte de partager ce moment avec vous.
-                    </p>
-
-                </form>
-
-            </section>
-
-        </div>
-
-
-        <!-- SIGNATURE DE FIN -->
-        <footer class="mt-12 pb-4 text-center">
-
-            <div class="mx-auto mb-4 flex items-center justify-center gap-3">
-                <span class="h-px w-8 bg-[#d8c4ba]"></span>
-                <span class="text-sm text-[#a47b76]" aria-hidden="true">✦</span>
-                <span class="h-px w-8 bg-[#d8c4ba]"></span>
-            </div>
-
-            <p class="font-serif text-xl italic text-[#79575a]">
-                Au plaisir de vous retrouver.
+        <section id="confirmation" class="inv-panel">
+            <p class="inv-panel__kicker">Votre réponse</p>
+            <h2>{% if accepted %}Vous serez des nôtres{% elif has_responded %}Vous ne pourrez pas venir{% else %}Serez-vous des nôtres ?{% endif %}</h2>
+            <p class="inv-panel__lead">
+                {% if has_responded %}Votre réponse est enregistrée. Vous pouvez la modifier ci-dessous si vos plans changent.{% else %}Merci de confirmer votre présence{% if event.rsvp_deadline %} avant le {{ event.rsvp_deadline|date:'j F Y' }}{% endif %} afin de nous aider à préparer votre accueil.{% endif %}
             </p>
 
-        </footer>
+            <form method="post" action="{% url 'rsvp:respond' invitation.token %}" class="inv-form" novalidate>
+                {% csrf_token %}
+                {% if form.non_field_errors %}
+                    <div class="inv-notice inv-notice--error" role="alert">{{ form.non_field_errors }}</div>
+                {% endif %}
 
+                <div class="inv-field{% if form.response.errors %} has-error{% endif %}">
+                    <span class="inv-label">Votre présence<span class="req">*</span></span>
+                    <div class="inv-choice" role="radiogroup" aria-label="Votre présence">
+                        {% for choice in form.response %}
+                            <label>
+                                {{ choice.tag }}
+                                <i aria-hidden="true"></i>
+                                <span>{{ choice.choice_label }}</span>
+                            </label>
+                        {% endfor %}
+                    </div>
+                    {{ form.response.errors }}
+                </div>
+
+                <div class="inv-field{% if form.companion_count.errors %} has-error{% endif %}" id="companions-field">
+                    <label for="{{ form.companion_count.id_for_label }}">{{ form.companion_count.label }}</label>
+                    {{ form.companion_count }}
+                    {% if form.companion_count.help_text %}<p class="help">{{ form.companion_count.help_text }}</p>{% endif %}
+                    {{ form.companion_count.errors }}
+                </div>
+
+                <div class="inv-field{% if form.drink_preference.errors %} has-error{% endif %}" id="drink-field">
+                    <label for="{{ form.drink_preference.id_for_label }}">{{ form.drink_preference.label }}</label>
+                    {{ form.drink_preference }}
+                    {{ form.drink_preference.errors }}
+                </div>
+
+                <div class="inv-field{% if form.guest_message.errors %} has-error{% endif %}">
+                    <label for="{{ form.guest_message.id_for_label }}">{{ form.guest_message.label }}</label>
+                    {{ form.guest_message }}
+                    {{ form.guest_message.errors }}
+                </div>
+
+                <button type="submit" class="inv-btn inv-btn--primary">{% if has_responded %}Mettre à jour ma réponse{% else %}Envoyer ma réponse{% endif %}</button>
+                <p class="inv-form-note">Vos informations ne sont utilisées que pour organiser votre accueil.</p>
+            </form>
+        </section>
     </div>
 
-</section>
+    <footer class="inv-foot">
+        <div class="inv-ornament" aria-hidden="true" style="color:#c9a27a;">✦</div>
+        <p>Au plaisir de vous retrouver.</p>
+        <small>Invitation réalisée avec <a href="{% url 'core:home' %}">Likita</a></small>
+    </footer>
+</main>
+{% endblock %}
 
+{% block scripts %}
+<script>
+(function () {
+  // Masque accompagnants/boisson quand l'invité décline.
+  const radios = document.querySelectorAll('input[name="response"]');
+  const companions = document.getElementById('companions-field');
+  const drink = document.getElementById('drink-field');
+  function sync() {
+    const declined = document.querySelector('input[name="response"]:checked')?.value === 'declined';
+    companions.style.display = declined ? 'none' : '';
+    drink.style.display = declined ? 'none' : '';
+  }
+  radios.forEach((r) => r.addEventListener('change', sync));
+  sync();
+
+  // Téléchargement du pass en image.
+  const button = document.getElementById('download-pass');
+  if (!button) return;
+  button.addEventListener('click', async () => {
+    const card = document.getElementById('pass-card');
+    const label = button.innerHTML;
+    button.disabled = true;
+    button.textContent = 'Préparation…';
+    try {
+      if (!window.html2canvas) {
+        await new Promise((resolve, reject) => {
+          const s = document.createElement('script');
+          s.src = 'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js';
+          s.onload = resolve; s.onerror = reject;
+          document.head.appendChild(s);
+        });
+      }
+      const canvas = await window.html2canvas(card, { scale: 2, useCORS: true, backgroundColor: null });
+      const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
+      const file = new File([blob], button.dataset.filename, { type: 'image/png' });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], title: document.title });
+      } else {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = button.dataset.filename;
+        a.click();
+        URL.revokeObjectURL(a.href);
+      }
+    } catch (e) {
+      if (e && e.name !== 'AbortError') window.print();
+    } finally {
+      button.disabled = false;
+      button.innerHTML = label;
+    }
+  });
+})();
+</script>
 {% endblock %}

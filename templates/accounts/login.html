@@ -4,33 +4,46 @@
 {% block title %}Connexion | Likita{% endblock %}
 
 {% block content %}
-<section class="auth-panel">
-    <div class="glass-card p-6 sm:p-8">
-        <div class="mb-7 flex items-center gap-4">
-            <img src="{% static 'media/branding/logo2.svg' %}" alt="Likita" class="auth-panel__mark object-contain">
-            <div>
-                <p class="text-sm font-semibold text-white">Likita</p>
-                <p class="mt-1 text-xs text-white/60">Gestion d'invitations et d'événements</p>
-            </div>
+<section class="auth">
+    <aside class="auth__aside" aria-hidden="true">
+        <div class="auth__aside-inner">
+            <a href="{% url 'core:home' %}" class="auth__brand"><img src="{% static 'media/branding/logo-wordmark.svg' %}" alt="Likita"></a>
+            <h2>Vos invités confirment, <em>vous accueillez l'esprit tranquille.</em></h2>
+            <p>Retrouvez vos événements, suivez les réponses en temps réel et scannez les QR codes le jour J.</p>
+            <ul class="auth__points">
+                <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg>Invitations WhatsApp personnalisées</li>
+                <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg>RSVP et accompagnants en direct</li>
+                <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg>Contrôle d'accès par QR code</li>
+            </ul>
+            <p class="auth__aside-foot">© {% now "Y" %} Likita</p>
         </div>
-        <p class="text-sm font-medium text-rose-200">Accès sécurisé</p>
-        <h1 class="mt-2 text-3xl font-semibold text-white">Connexion</h1>
-        <p class="mt-2 text-sm leading-6 text-white/65">Accédez à votre espace de gestion.</p>
-        <form method="post" class="mt-7 space-y-5">
-            {% csrf_token %}
-            {% for field in form %}
-                <div class="space-y-2">
-                    <label class="text-sm font-medium text-white/80">{{ field.label }}</label>
-                    {{ field }}
-                    {{ field.errors }}
+    </aside>
+
+    <div class="auth__main">
+        <div class="auth__topbar">
+            <a href="{% url 'core:home' %}"><img src="{% static 'media/branding/logo-wordmark.svg' %}" alt="Likita"></a>
+            <a href="{% url 'core:home' %}" class="auth__back">← Retour à l'accueil</a>
+        </div>
+
+        <div class="auth__card">
+            <h1>Connexion</h1>
+            <p>Accédez à votre espace organisateur.</p>
+
+            <form method="post" class="form-grid" novalidate>
+                {% csrf_token %}
+                {% if form.non_field_errors %}
+                    <div class="form-errors field--full" role="alert">{{ form.non_field_errors }}</div>
+                {% endif %}
+                {% include 'partials/field.html' with field=form.username full=True %}
+                {% include 'partials/field.html' with field=form.password full=True %}
+                {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+                <div class="form-actions field--full">
+                    <button type="submit" class="btn-primary w-full">Se connecter</button>
                 </div>
-            {% endfor %}
-            <button type="submit" class="btn-primary w-full">Entrer dans Likita</button>
-        </form>
-        <p class="mt-6 text-center text-sm text-white/65">
-            Pas encore de compte ?
-            <a href="{% url 'accounts:signup' %}" class="font-semibold text-rose-300 transition hover:text-rose-200">Créer un compte</a>
-        </p>
+            </form>
+
+            <p class="auth__switch">Pas encore de compte ? <a href="{% url 'accounts:signup' %}">Créer mon espace</a></p>
+        </div>
     </div>
 </section>
 {% endblock %}

@@ -1,95 +1,105 @@
 {% extends 'base.html' %}
 
-{% block title %}Invites | Likita{% endblock %}
+{% block title %}Invités | Likita{% endblock %}
 
 {% block content %}
-<section class="space-y-8">
-    <div class="flex flex-wrap items-end justify-between gap-4">
+<section class="page">
+    <div class="page-head">
         <div>
-            <p class="text-xs uppercase tracking-[0.3em] text-white/40">Gestion des invites</p>
-            <h1 class="mt-2 text-4xl font-semibold">{% if selected_event %}Invités · {{ selected_event.name }}{% else %}Carnet d'invités{% endif %}</h1>
-            <p class="mt-3 max-w-2xl text-white/60">Centralisez vos listes VIP, familles et groupes avec import massif, filtres de réponse et envoi WhatsApp Business.</p>
+            <p class="page-head__eyebrow">Invités{% if selected_event %}<span>/</span><a href="{% url 'events:dashboard' selected_event.slug %}">{{ selected_event.name }}</a>{% endif %}</p>
+            <h1>{% if selected_event %}Invités de « {{ selected_event.name }} »{% else %}Tous vos invités{% endif %}</h1>
+            <p class="page-head__lead">{{ page_obj.paginator.count }} invité{{ page_obj.paginator.count|pluralize }}{% if request.GET.q or selected_response %} correspondant{{ page_obj.paginator.count|pluralize }} aux filtres{% endif %} · Envoyez les invitations, suivez les réponses et les scans.</p>
         </div>
-        <div class="flex flex-wrap gap-3">
+        <div class="page-head__actions">
             <a href="{% url 'guests:import-upload' %}" class="btn-secondary">Importer CSV / Excel</a>
-            <a href="{% url 'guests:create' %}" class="btn-primary">Ajouter un invite</a>
+            <a href="{% url 'guests:create' %}" class="btn-primary">Ajouter un invité</a>
         </div>
     </div>
-    <div class="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
-        <form method="get" class="glass-card grid gap-3 p-4 sm:grid-cols-2 xl:grid-cols-4">
-            <input type="search" name="q" value="{{ request.GET.q }}" placeholder="Rechercher un nom, téléphone ou catégorie" class="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/35 focus:border-rose-500 focus:outline-none">
-            <select name="event" class="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white focus:border-rose-500 focus:outline-none">
-                <option value="">Tous les événements</option>
-                {% for event in event_choices %}
-                    <option value="{{ event.pk }}" {% if selected_event and selected_event.pk == event.pk %}selected{% endif %}>{{ event.name }}</option>
-                {% endfor %}
-            </select>
-            <select name="response" class="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white focus:border-rose-500 focus:outline-none">
-                <option value="">Toutes les réponses</option>
-                {% for value, label in response_choices %}
-                    <option value="{{ value }}" {% if selected_response == value %}selected{% endif %}>{{ label }}</option>
-                {% endfor %}
-            </select>
-            <button class="btn-secondary">Filtrer</button>
-        </form>
-        <div class="glass-card grid grid-cols-3 gap-3 p-4 text-center">
-            <div>
-                <p class="text-xs uppercase tracking-[0.25em] text-white/35">Total</p>
-                <p class="mt-2 text-3xl font-semibold">{{ page_obj.paginator.count }}</p>
-            </div>
-            <div>
-                <p class="text-xs uppercase tracking-[0.25em] text-white/35">Page</p>
-                <p class="mt-2 text-3xl font-semibold">{{ page_obj.number }}</p>
-            </div>
-            <div>
-                <p class="text-xs uppercase tracking-[0.25em] text-white/35">Lot</p>
-                <p class="mt-2 text-3xl font-semibold">{{ guests|length }}</p>
-            </div>
+
+    <form method="get" class="panel filters" role="search">
+        <input type="search" name="q" value="{{ request.GET.q }}" placeholder="Rechercher un nom ou un numéro" aria-label="Rechercher" class="w-full rounded-md border border-white/15 bg-black/20 px-3.5 py-2.5 text-sm text-white placeholder:text-white/45 focus:border-rose-400 focus:outline-none">
+        <select name="event" aria-label="Événement" class="w-full rounded-md border border-white/15 bg-black/20 px-3.5 py-2.5 text-sm text-white focus:border-rose-400 focus:outline-none">
+            <option value="">Tous les événements</option>
+            {% for event in event_choices %}
+                <option value="{{ event.pk }}" {% if selected_event and selected_event.pk == event.pk %}selected{% endif %}>{{ event.name }}</option>
+            {% endfor %}
+        </select>
+        <select name="response" aria-label="Réponse" class="w-full rounded-md border border-white/15 bg-black/20 px-3.5 py-2.5 text-sm text-white focus:border-rose-400 focus:outline-none">
+            <option value="">Toutes les réponses</option>
+            {% for value, label in response_choices %}
+                <option value="{{ value }}" {% if selected_response == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+        <div class="flex gap-2">
+            <button class="btn-sm btn-sm--primary !py-2.5 !px-4">Filtrer</button>
+            {% if request.GET.q or request.GET.event or request.GET.response %}<a href="{% url 'guests:list' %}" class="btn-sm btn-sm--ghost !py-2.5 !px-4">Réinitialiser</a>{% endif %}
         </div>
-    </div>
-    <div class="grid gap-4">
-        {% for guest in guests %}
-            <article class="glass-card overflow-hidden p-0">
-                <div class="grid gap-5 border-b border-white/8 bg-gradient-to-r from-white/6 to-transparent p-5 lg:grid-cols-[1.25fr_0.75fr] lg:items-center">
-                    <div>
-                        <div class="flex flex-wrap items-center gap-3">
-                            <span class="rounded-full border border-white/10 px-3 py-1 text-xs text-white/55">{{ guest.get_category_display }}</span>
-                            <span class="rounded-full border border-white/10 px-3 py-1 text-xs text-white/55">{{ guest.get_status_display }}</span>
-                        </div>
-                        <h2 class="mt-4 text-2xl font-semibold">{{ guest.full_name }}</h2>
-                        <p class="mt-2 text-white/60">{{ guest.whatsapp_number }} · {{ guest.event.name }}</p>
-                        <p class="mt-1 text-sm text-white/45">Table {{ guest.reserved_table|default:'Non attribuee' }} · {{ guest.allowed_companions }} accompagnant(s)</p>
-                    </div>
-                    <div class="grid gap-3 sm:grid-cols-2">
-                        <div class="rounded-3xl border border-white/10 bg-black/20 p-4">
-                            <p class="text-xs uppercase tracking-[0.25em] text-white/35">Invitation</p>
-                            <p class="mt-2 text-lg font-semibold">{{ guest.invitation.get_delivery_status_display }}</p>
-                        </div>
-                        <div class="rounded-3xl border border-white/10 bg-black/20 p-4">
-                            <p class="text-xs uppercase tracking-[0.25em] text-white/35">RSVP</p>
-                            <p class="mt-2 text-lg font-semibold">{{ guest.rsvp.get_response_display }}</p>
-                        </div>
-                    </div>
+    </form>
+
+    {% if guests %}
+    <div class="panel">
+        <div class="table-wrap">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Invité</th>
+                        {% if not selected_event %}<th>Événement</th>{% endif %}
+                        <th>Catégorie</th>
+                        <th>Invitation</th>
+                        <th>Réponse</th>
+                        <th class="text-right">Accomp.</th>
+                        <th class="text-right">Scans</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for guest in guests %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'guests:detail' guest.pk %}" class="table__primary">{{ guest.full_name }}</a>
+                            <div class="table__muted">{{ guest.whatsapp_number }}{% if guest.reserved_table %} · Table {{ guest.reserved_table }}{% endif %}</div>
+                        </td>
+                        {% if not selected_event %}<td><a href="{% url 'guests:list' %}?event={{ guest.event.pk }}" class="table__muted hover:text-white">{{ guest.event.name|truncatechars:32 }}</a></td>{% endif %}
+                        <td><span class="badge">{{ guest.get_category_display }}</span></td>
+                        <td>{% if guest.invitation %}<span class="badge badge--{{ guest.invitation.delivery_status }}">{{ guest.invitation.get_delivery_status_display }}</span>{% else %}<span class="table__muted">—</span>{% endif %}</td>
+                        <td>{% if guest.rsvp %}<span class="badge badge--{{ guest.rsvp.response }}">{{ guest.rsvp.get_response_display }}</span>{% else %}<span class="table__muted">—</span>{% endif %}</td>
+                        <td class="text-right">{{ guest.allowed_companions }}</td>
+                        <td class="text-right">{{ guest.qrcode.scan_count|default:0 }}</td>
+                        <td>
+                            <div class="table__actions">
+                                {% if guest.invitation %}<a href="{% url 'invitations:send' guest.invitation.token %}" class="btn-sm btn-sm--ghost">WhatsApp</a>{% endif %}
+                                <a href="{% url 'guests:detail' guest.pk %}" class="btn-sm btn-sm--ghost">Détails</a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% if is_paginated %}
+            <div class="flex flex-wrap items-center justify-between gap-3 border-t border-white/8 px-5 py-3 text-sm text-white/55">
+                <span>Page {{ page_obj.number }} sur {{ page_obj.paginator.num_pages }}</span>
+                <div class="flex gap-2">
+                    {% if page_obj.has_previous %}<a href="?{{ pagination_query }}{% if pagination_query %}&{% endif %}page={{ page_obj.previous_page_number }}" class="btn-sm btn-sm--ghost">Précédent</a>{% endif %}
+                    {% if page_obj.has_next %}<a href="?{{ pagination_query }}{% if pagination_query %}&{% endif %}page={{ page_obj.next_page_number }}" class="btn-sm btn-sm--ghost">Suivant</a>{% endif %}
                 </div>
-                <div class="flex flex-wrap items-center justify-between gap-3 p-5">
-                    <p class="text-sm text-white/45">QR scans: {{ guest.qrcode.scan_count|default:0 }}</p>
-                    <div class="flex flex-wrap items-center gap-3">
-                        {% if guest.invitation %}<a href="{% url 'invitations:send' guest.invitation.token %}" class="btn-secondary">Envoyer via WhatsApp</a>{% endif %}
-                        <a href="{% url 'guests:detail' guest.pk %}" class="btn-primary">Details</a>
-                    </div>
-                </div>
-            </article>
-        {% empty %}
-            <div class="glass-card p-8 text-white/55">Aucun invite ajoute pour le moment.</div>
-        {% endfor %}
-    </div>
-    {% if is_paginated %}
-        <div class="flex items-center justify-between pt-4 text-sm text-white/55">
-            <span>Page {{ page_obj.number }} sur {{ page_obj.paginator.num_pages }}</span>
-            <div class="flex gap-3">
-                {% if page_obj.has_previous %}<a href="?{{ pagination_query }}{% if pagination_query %}&{% endif %}page={{ page_obj.previous_page_number }}" class="btn-secondary">Precedent</a>{% endif %}
-                {% if page_obj.has_next %}<a href="?{{ pagination_query }}{% if pagination_query %}&{% endif %}page={{ page_obj.next_page_number }}" class="btn-secondary">Suivant</a>{% endif %}
             </div>
+        {% endif %}
+    </div>
+    {% else %}
+        <div class="empty">
+            {% if request.GET.q or request.GET.event or request.GET.response %}
+                <strong>Aucun invité ne correspond à ces filtres</strong>
+                <p>Essayez un autre terme de recherche ou réinitialisez les filtres.</p>
+                <a href="{% url 'guests:list' %}" class="btn-secondary">Réinitialiser</a>
+            {% else %}
+                <strong>Aucun invité pour le moment</strong>
+                <p>Ajoutez vos invités un par un ou importez une liste complète depuis un fichier CSV ou Excel.</p>
+                <div class="flex flex-wrap justify-center gap-2">
+                    <a href="{% url 'guests:import-upload' %}" class="btn-secondary">Importer un fichier</a>
+                    <a href="{% url 'guests:create' %}" class="btn-primary">Ajouter un invité</a>
+                </div>
+            {% endif %}
         </div>
     {% endif %}
 </section>

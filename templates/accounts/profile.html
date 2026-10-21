@@ -3,25 +3,50 @@
 {% block title %}Profil | Likita{% endblock %}
 
 {% block content %}
-<section class="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
-    <div class="glass-card p-8">
-        <p class="text-xs uppercase tracking-[0.3em] text-white/40">Profil</p>
-        <h1 class="mt-3 text-3xl font-semibold">{{ request.user.get_full_name|default:request.user.email }}</h1>
-        <div class="mt-6 space-y-3 text-sm text-white/65">
-            <p>Courriel: {{ request.user.email }}</p>
-            <p>Telephone: {{ request.user.phone_number|default:'-' }}</p>
-            <p>Entreprise: {{ request.user.company_name|default:'-' }}</p>
-            <p>Plan: {{ request.user.get_subscription_tier_display }}</p>
+<section class="page page--narrow">
+    <div class="page-head">
+        <div>
+            <p class="page-head__eyebrow">Compte</p>
+            <h1>Mon profil</h1>
+        </div>
+        <div class="page-head__actions">
+            <a href="{% url 'accounts:settings' %}" class="btn-secondary">Paramètres</a>
         </div>
     </div>
-    <div class="glass-card p-8">
-        <p class="text-xs uppercase tracking-[0.3em] text-white/40">Raccourcis</p>
-        <div class="mt-6 grid gap-4 sm:grid-cols-2">
-            <a href="{% url 'events:create' %}" class="metric-card">Creer un evenement</a>
-            <a href="{% url 'guests:create' %}" class="metric-card">Ajouter un invite</a>
-            <a href="{% url 'dashboard:statistics' %}" class="metric-card">Voir les statistiques</a>
-            <a href="{% url 'accounts:settings' %}" class="metric-card">Parametres</a>
-        </div>
+
+    <div class="grid gap-6 md:grid-cols-[0.9fr_1.1fr]">
+        <section class="panel">
+            <div class="panel__body flex items-center gap-4">
+                <span class="workspace-profile-link__avatar !h-14 !w-14 text-xl">{{ request.user.first_name|default:request.user.email|first|upper }}</span>
+                <div class="min-w-0">
+                    <p class="truncate text-lg font-semibold">{{ request.user.get_full_name|default:request.user.email }}</p>
+                    <p class="truncate text-sm text-white/55">{{ request.user.email }}</p>
+                    <span class="badge mt-2">{{ request.user.get_subscription_tier_display }}</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="panel">
+            <div class="panel__head"><h2>Coordonnées</h2></div>
+            <div class="panel__body">
+                <dl class="dl">
+                    <div><dt>E-mail</dt><dd>{{ request.user.email }}</dd></div>
+                    <div><dt>Téléphone</dt><dd>{{ request.user.phone_number|default:"—" }}</dd></div>
+                    <div><dt>Entreprise</dt><dd>{{ request.user.company_name|default:"—" }}</dd></div>
+                    <div><dt>Membre depuis</dt><dd>{{ request.user.date_joined|date:"F Y" }}</dd></div>
+                </dl>
+            </div>
+        </section>
     </div>
+
+    <section class="panel">
+        <div class="panel__head"><h2>Raccourcis</h2></div>
+        <div class="panel__body grid gap-3 sm:grid-cols-2">
+            <a href="{% url 'events:create' %}" class="list-item items-center hover:border-white/20"><strong>Créer un événement</strong><span class="text-white/40">→</span></a>
+            <a href="{% url 'guests:create' %}" class="list-item items-center hover:border-white/20"><strong>Ajouter un invité</strong><span class="text-white/40">→</span></a>
+            <a href="{% url 'guests:import-upload' %}" class="list-item items-center hover:border-white/20"><strong>Importer des invités</strong><span class="text-white/40">→</span></a>
+            <a href="{% url 'dashboard:statistics' %}" class="list-item items-center hover:border-white/20"><strong>Voir les statistiques</strong><span class="text-white/40">→</span></a>
+        </div>
+    </section>
 </section>
 {% endblock %}

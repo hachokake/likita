@@ -1,22 +1,57 @@
 {% extends 'base.html' %}
 
-{% block title %}Evenement | Likita{% endblock %}
+{% block title %}{% if object %}Modifier{% else %}Créer{% endif %} un événement | Likita{% endblock %}
 
 {% block content %}
-<section class="mx-auto max-w-5xl">
-    <div class="glass-card p-8 sm:p-10">
-        <h1 class="text-4xl font-semibold">{% if form.instance.pk %}Modifier{% else %}Creer{% endif %} un evenement</h1>
-        <form method="post" enctype="multipart/form-data" class="mt-8 grid gap-5 sm:grid-cols-2">
+<section class="page page--narrow">
+    <div class="page-head">
+        <div>
+            <p class="page-head__eyebrow"><a href="{% url 'events:list' %}">Événements</a><span>/</span><span>{% if object %}Modification{% else %}Création{% endif %}</span></p>
+            <h1>{% if object %}Modifier « {{ object.name }} »{% else %}Créer un événement{% endif %}</h1>
+            <p class="page-head__lead">Les champs marqués d'un <span class="text-rose-300">*</span> sont obligatoires. Vous pourrez compléter le reste plus tard.</p>
+        </div>
+    </div>
+
+    <div class="panel">
+        <form method="post" enctype="multipart/form-data" class="panel__body form-grid" novalidate>
             {% csrf_token %}
-            {% for field in form %}
-                <div class="space-y-2 {% if field.name in 'description detailed_program welcome_message cover_image background_music' %}sm:col-span-2{% endif %}">
-                    <label class="text-sm text-white/60">{{ field.label }}</label>
-                    {{ field }}
-                    {% if field.help_text %}<p class="text-xs text-white/35">{{ field.help_text }}</p>{% endif %}
-                    {{ field.errors }}
-                </div>
-            {% endfor %}
-            <button type="submit" class="btn-primary sm:col-span-2">Enregistrer l'evenement</button>
+            {% if form.non_field_errors %}
+                <div class="form-errors field--full" role="alert">{{ form.non_field_errors }}</div>
+            {% endif %}
+
+            <p class="form-section">Essentiel</p>
+            {% include 'partials/field.html' with field=form.name full=True %}
+            {% include 'partials/field.html' with field=form.event_type %}
+            {% include 'partials/field.html' with field=form.host_names %}
+            {% include 'partials/field.html' with field=form.event_date %}
+            {% include 'partials/field.html' with field=form.event_time %}
+            {% include 'partials/field.html' with field=form.address full=True %}
+            {% include 'partials/field.html' with field=form.google_maps_url full=True %}
+
+            <p class="form-section">Contenu de l'invitation</p>
+            {% include 'partials/field.html' with field=form.description full=True %}
+            {% include 'partials/field.html' with field=form.welcome_message full=True %}
+            {% include 'partials/field.html' with field=form.detailed_program full=True %}
+            {% include 'partials/field.html' with field=form.dress_code %}
+            {% include 'partials/field.html' with field=form.rsvp_deadline %}
+
+            <p class="form-section">Médias</p>
+            {% include 'partials/field.html' with field=form.cover_image %}
+            {% include 'partials/field.html' with field=form.background_music %}
+
+            <p class="form-section">Accès</p>
+            {% include 'partials/field.html' with field=form.max_guests %}
+            {% include 'partials/field.html' with field=form.allow_multiple_entries %}
+
+            <div class="form-actions">
+                {% if object %}
+                    <a href="{% url 'events:detail' object.slug %}" class="cancel">Annuler</a>
+                    <button type="submit" class="btn-primary">Enregistrer les modifications</button>
+                {% else %}
+                    <a href="{% url 'events:list' %}" class="cancel">Annuler</a>
+                    <button type="submit" class="btn-primary">Créer l'événement</button>
+                {% endif %}
+            </div>
         </form>
     </div>
 </section>

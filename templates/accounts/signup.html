@@ -1,27 +1,54 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Inscription | Likita{% endblock %}
+{% block title %}Créer mon espace | Likita{% endblock %}
 
 {% block content %}
-<section class="mx-auto max-w-3xl">
-    <div class="glass-card p-8 sm:p-10">
-        <div class="mb-4 flex items-start justify-start">
-            <img src="{% static 'media/branding/logo2.svg' %}" alt="Likita" style="width: 48px; height: 48px;" class="object-contain">
+<section class="auth">
+    <aside class="auth__aside" aria-hidden="true">
+        <div class="auth__aside-inner">
+            <a href="{% url 'core:home' %}" class="auth__brand"><img src="{% static 'media/branding/logo-wordmark.svg' %}" alt="Likita"></a>
+            <h2>Créez votre espace, <em>envoyez votre première invitation aujourd'hui.</em></h2>
+            <p>Un compte suffit pour gérer tous vos événements : mariages, collations de grade, anniversaires, conférences.</p>
+            <ul class="auth__points">
+                <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg>Création d'événements illimitée</li>
+                <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg>Import d'invités CSV / Excel</li>
+                <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg>Scanner QR inclus</li>
+            </ul>
+            <p class="auth__aside-foot">© {% now "Y" %} Likita</p>
         </div>
-        <p class="text-xs uppercase tracking-[0.3em] text-white/40">Creation de compte</p>
-        <h1 class="mt-3 text-4xl font-semibold">Creer votre espace organisateur</h1>
-        <form method="post" class="mt-8 grid gap-5 sm:grid-cols-2">
-            {% csrf_token %}
-            {% for field in form %}
-                <div class="space-y-2 {% if field.name == 'password1' or field.name == 'password2' %}sm:col-span-2{% endif %}">
-                    <label class="text-sm text-white/60">{{ field.label }}</label>
-                    {{ field }}
-                    {{ field.errors }}
+    </aside>
+
+    <div class="auth__main">
+        <div class="auth__topbar">
+            <a href="{% url 'core:home' %}"><img src="{% static 'media/branding/logo-wordmark.svg' %}" alt="Likita"></a>
+            <a href="{% url 'core:home' %}" class="auth__back">← Retour à l'accueil</a>
+        </div>
+
+        <div class="auth__card auth__card--wide">
+            <h1>Créer mon espace</h1>
+            <p>Quelques informations suffisent pour démarrer.</p>
+
+            <form method="post" class="form-grid" novalidate>
+                {% csrf_token %}
+                {% if form.non_field_errors %}
+                    <div class="form-errors field--full" role="alert">{{ form.non_field_errors }}</div>
+                {% endif %}
+                {% include 'partials/field.html' with field=form.first_name %}
+                {% include 'partials/field.html' with field=form.last_name %}
+                {% include 'partials/field.html' with field=form.email full=True %}
+                {% include 'partials/field.html' with field=form.phone_number %}
+                {% include 'partials/field.html' with field=form.company_name %}
+                <p class="form-section">Mot de passe</p>
+                {% include 'partials/field.html' with field=form.password1 %}
+                {% include 'partials/field.html' with field=form.password2 %}
+                <div class="form-actions field--full">
+                    <button type="submit" class="btn-primary w-full">Créer mon compte</button>
                 </div>
-            {% endfor %}
-            <button type="submit" class="btn-primary sm:col-span-2">Ouvrir mon compte</button>
-        </form>
+            </form>
+
+            <p class="auth__switch">Déjà un compte ? <a href="{% url 'accounts:login' %}">Se connecter</a></p>
+        </div>
     </div>
 </section>
 {% endblock %}

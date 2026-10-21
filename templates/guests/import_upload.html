@@ -1,25 +1,31 @@
 {% extends 'base.html' %}
 
-{% block title %}Import invites | Likita{% endblock %}
+{% block title %}Importer des invités | Likita{% endblock %}
 
 {% block content %}
-<section class="mx-auto max-w-4xl space-y-8">
-    <div>
-        <p class="text-xs uppercase tracking-[0.3em] text-white/40">Import intelligent</p>
-        <h1 class="mt-2 text-4xl font-semibold">Charger un fichier CSV ou Excel</h1>
-        <p class="mt-3 max-w-3xl text-white/60">Likita detecte les colonnes, vous laisse les mapper proprement, puis cree ou met a jour les invites selon votre strategie.</p>
+<section class="page page--narrow">
+    <div class="page-head">
+        <div>
+            <p class="page-head__eyebrow"><a href="{% url 'guests:list' %}">Invités</a><span>/</span><span>Import</span></p>
+            <h1>Importer une liste d'invités</h1>
+            <p class="page-head__lead">Chargez un fichier CSV ou Excel. À l'étape suivante, vous associerez chaque colonne au bon champ avant de lancer l'import.</p>
+        </div>
     </div>
-    <div class="glass-card p-8 sm:p-10">
-        <form method="post" enctype="multipart/form-data" class="grid gap-5 sm:grid-cols-2">
+
+    <div class="panel">
+        <form method="post" enctype="multipart/form-data" class="panel__body form-grid" novalidate>
             {% csrf_token %}
-            {% for field in form %}
-                <div class="space-y-2 {% if field.name == 'file' %}sm:col-span-2{% endif %}">
-                    <label class="text-sm text-white/60">{{ field.label }}</label>
-                    {{ field }}
-                    {{ field.errors }}
-                </div>
-            {% endfor %}
-            <button type="submit" class="btn-primary sm:col-span-2">Analyser le fichier</button>
+            {% if form.non_field_errors %}
+                <div class="form-errors field--full" role="alert">{{ form.non_field_errors }}</div>
+            {% endif %}
+            {% include 'partials/field.html' with field=form.event %}
+            {% include 'partials/field.html' with field=form.import_mode %}
+            {% include 'partials/field.html' with field=form.file full=True %}
+            <p class="field--full help text-sm text-white/50">Colonnes reconnues : nom complet, numéro WhatsApp, e-mail, catégorie, accompagnants, table, notes. Formats acceptés : CSV, XLSX, XLSM.</p>
+            <div class="form-actions">
+                <a href="{% url 'guests:list' %}" class="cancel">Annuler</a>
+                <button type="submit" class="btn-primary">Analyser le fichier</button>
+            </div>
         </form>
     </div>
 </section>

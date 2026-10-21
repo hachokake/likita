@@ -3,60 +3,146 @@
 {% block title %}Tableau de bord | Likita{% endblock %}
 
 {% block content %}
-<section class="space-y-8">
-    <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+<section class="page">
+    <div class="page-head">
         <div>
-            <p class="text-xs uppercase tracking-[0.3em] text-white/40">Tableau de bord</p>
-            <h1 class="mt-2 text-3xl font-semibold sm:text-4xl">Pilotage de vos evenements</h1>
+            <p class="page-head__eyebrow">Tableau de bord</p>
+            <h1>Bonjour {{ request.user.first_name|default:"et bienvenue" }}</h1>
+            <p class="page-head__lead">Vue d'ensemble de vos événements, de vos invités et des entrées validées.</p>
         </div>
-        <div class="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
-            <a href="{% url 'events:create' %}" class="btn-primary w-full sm:w-auto">Creer un evenement</a>
-            <a href="{% url 'dashboard:statistics' %}" class="btn-secondary w-full sm:w-auto">Statistiques</a>
+        <div class="page-head__actions">
+            <a href="{% url 'guests:create' %}" class="btn-secondary">Ajouter un invité</a>
+            <a href="{% url 'events:create' %}" class="btn-primary">Créer un événement</a>
         </div>
     </div>
 
-    <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <div class="metric-card"><p class="text-sm text-white/45">Evenements</p><p class="mt-3 text-4xl font-semibold">{{ stats.events }}</p></div>
-        <div class="metric-card"><p class="text-sm text-white/45">Invites</p><p class="mt-3 text-4xl font-semibold">{{ stats.guests }}</p></div>
-        <div class="metric-card"><p class="text-sm text-white/45">Presents</p><p class="mt-3 text-4xl font-semibold">{{ stats.present }}</p></div>
-        <div class="metric-card"><p class="text-sm text-white/45">QR utilises</p><p class="mt-3 text-4xl font-semibold">{{ stats.scanned }}</p></div>
+    <div class="stat-grid">
+        <a href="{% url 'events:list' %}" class="stat">
+            <p class="stat__label">Événements</p>
+            <p class="stat__value">{{ stats.events }}</p>
+            <p class="stat__hint">Tous statuts confondus</p>
+        </a>
+        <a href="{% url 'guests:list' %}" class="stat">
+            <p class="stat__label">Invités</p>
+            <p class="stat__value">{{ stats.guests }}</p>
+            <p class="stat__hint">{{ stats.pending }} en attente de réponse</p>
+        </a>
+        <a href="{% url 'guests:list' %}?response=accepted" class="stat">
+            <p class="stat__label">Présents</p>
+            <p class="stat__value">{{ stats.present }}</p>
+            <p class="stat__hint">{{ stats.absent }} absent(s)</p>
+        </a>
+        <a href="{% url 'scanner:home' %}" class="stat">
+            <p class="stat__label">Entrées validées</p>
+            <p class="stat__value">{{ stats.scanned }}</p>
+            <p class="stat__hint stat__hint--ok">Scans autorisés</p>
+        </a>
     </div>
 
-    <div class="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-        <div class="glass-card p-6">
-            <div class="flex items-center justify-between">
-                <h2 class="text-2xl font-semibold">Pipeline des evenements</h2>
-                <span class="text-sm text-white/45">Top 5</span>
-            </div>
-            <div class="mt-6 space-y-4">
-                {% for event in event_breakdown %}
+    {% if stats.events == 0 %}
+        <div class="empty">
+            <strong>Commencez par créer votre premier événement</strong>
+            <p>Vous pourrez ensuite importer vos invités, envoyer les invitations WhatsApp et suivre les confirmations ici.</p>
+            <a href="{% url 'events:create' %}" class="btn-primary">Créer un événement</a>
+        </div>
+    {% else %}
+    <div class="grid gap-6 xl:grid-cols-[1.25fr_0.75fr]">
+        <div class="grid gap-6">
+            <section class="panel">
+                <div class="panel__head">
                     <div>
-                        <div class="mb-2 flex justify-between text-sm text-white/60">
-                            <span>{{ event.name }}</span>
-                            <span>{{ event.total_guests }} invites</span>
-                        </div>
-                        <div class="h-3 rounded-full bg-white/8">
-                            <div class="h-3 rounded-full bg-gradient-to-r from-rose-700 to-red-400" style="width: {% widthratio event.total_guests 200 100 %}%"></div>
-                        </div>
+                        <h2>Prochains événements</h2>
+                        <p>Classés par date</p>
                     </div>
-                {% empty %}
-                    <p class="text-white/55">Aucun evenement pour le moment.</p>
-                {% endfor %}
-            </div>
+                    <a href="{% url 'events:list' %}" class="panel__link">Tout voir</a>
+                </div>
+                {% if upcoming_events %}
+                    <div class="table-wrap">
+                        <table class="table">
+                            <thead>
+                                <tr><th>Événement</th><th>Date</th><th>Statut</th><th></th></tr>
+                            </thead>
+                            <tbody>
+                                {% for event in upcoming_events %}
+                                <tr>
+                                    <td>
+                                        <a href="{% url 'events:dashboard' event.slug %}" class="table__primary">{{ event.name }}</a>
+                                        <div class="table__muted">{{ event.get_event_type_display }} · {{ event.address|truncatechars:40 }}</div>
+                                    </td>
+                                    <td class="whitespace-nowrap">{{ event.event_date|date:"j M Y" }}<div class="table__muted">{{ event.event_time|time:"H:i" }}</div></td>
+                                    <td><span class="badge badge--{{ event.status }}">{{ event.get_status_display }}</span></td>
+                                    <td><div class="table__actions"><a href="{% url 'events:dashboard' event.slug %}" class="btn-sm btn-sm--ghost">Gérer</a></div></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="panel__body"><p class="text-sm text-white/55">Aucun événement à venir. Vos événements passés restent accessibles dans la liste.</p></div>
+                {% endif %}
+            </section>
+
+            <section class="panel">
+                <div class="panel__head">
+                    <div>
+                        <h2>Invités par événement</h2>
+                        <p>Vos 5 derniers événements</p>
+                    </div>
+                </div>
+                <div class="panel__body grid gap-4">
+                    {% for event in event_breakdown %}
+                        <div>
+                            <div class="mb-1.5 flex items-center justify-between gap-4 text-sm">
+                                <a href="{% url 'events:dashboard' event.slug %}" class="table__primary truncate">{{ event.name }}</a>
+                                <span class="table__muted whitespace-nowrap">{{ event.total_guests }} invité{{ event.total_guests|pluralize }}</span>
+                            </div>
+                            <div class="progress"><span style="width: {{ event.guest_ratio }}%"></span></div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </section>
         </div>
-        <div class="glass-card p-6">
-            <h2 class="text-2xl font-semibold">Repartition des invites</h2>
-            <div class="mt-6 space-y-4">
-                {% for item in guest_mix %}
-                    <div class="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
-                        <span class="capitalize">{{ item.category }}</span>
-                        <span class="font-semibold">{{ item.total }}</span>
-                    </div>
-                {% empty %}
-                    <p class="text-white/55">Ajoutez des invites pour afficher vos segments.</p>
-                {% endfor %}
-            </div>
+
+        <div class="grid gap-6 content-start">
+            <section class="panel">
+                <div class="panel__head">
+                    <h2>Répartition des invités</h2>
+                </div>
+                <div class="panel__body">
+                    {% if guest_mix %}
+                        <ul class="list">
+                            {% for item in guest_mix %}
+                                <li class="list-item items-center"><strong>{{ item.label }}</strong><span class="font-semibold">{{ item.total }}</span></li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-sm text-white/55">Ajoutez des invités pour voir leur répartition par catégorie.</p>
+                    {% endif %}
+                </div>
+            </section>
+
+            <section class="panel">
+                <div class="panel__head">
+                    <h2>Dernières notifications</h2>
+                    <a href="{% url 'notifications:list' %}" class="panel__link">Tout voir</a>
+                </div>
+                <div class="panel__body">
+                    {% if recent_notifications %}
+                        <ul class="list">
+                            {% for notification in recent_notifications %}
+                                <li class="list-item {% if not notification.is_read %}list-item--unread{% endif %}">
+                                    <div><strong>{{ notification.title }}</strong><p>{{ notification.body|truncatechars:90 }}</p></div>
+                                    <time datetime="{{ notification.created_at|date:'c' }}">{{ notification.created_at|date:"j M, H:i" }}</time>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-sm text-white/55">Les confirmations et les scans apparaîtront ici.</p>
+                    {% endif %}
+                </div>
+            </section>
         </div>
     </div>
+    {% endif %}
 </section>
 {% endblock %}

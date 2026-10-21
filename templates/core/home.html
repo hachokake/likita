@@ -1,445 +1,249 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Likita | Invitations haut de gamme{% endblock %}
+{% block title %}Likita | Invitations digitales, RSVP et contrôle d'accès QR{% endblock %}
 
 {% block content %}
-<style>
-    :root {
-        --motion-ease-premium: cubic-bezier(0.22, 1, 0.36, 1);
-    }
-
-    .invitation-carousel {
-        background: transparent;
-        border: none !important;
-        box-shadow: none !important;
-        padding: 0;
-    }
-
-    .carousel-photo {
-        width: 100%;
-        height: 100%;
-        object-fit: contain;
-        background-color: transparent;
-        backface-visibility: hidden;
-        transform: scale(1);
-        transition: transform 900ms var(--motion-ease-premium), filter 400ms ease;
-    }
-
-    .carousel-slide:hover .carousel-photo {
-        transform: scale(1.035);
-        filter: saturate(1.08) contrast(1.05);
-    }
-
-    .carousel-stage::after {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(to top, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.2) 35%, transparent 100%);
-        pointer-events: none;
-        z-index: 1;
-    }
-
-    /* Zones cliquables gauche et droite bien délimitées */
-    .carousel-click-zone {
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        width: 40%;
-        z-index: 5;
-        cursor: pointer;
-        background: transparent;
-        -webkit-tap-highlight-color: transparent;
-    }
-
-    .carousel-click-zone-left {
-        left: 0;
-    }
-
-    .carousel-click-zone-right {
-        right: 0;
-    }
-
-    .btn-primary,
-    .btn-secondary,
-    .nav-chip {
-        position: relative;
-        overflow: hidden;
-        transition: transform 280ms var(--motion-ease-premium), color 220ms ease, opacity 220ms ease;
-        will-change: transform;
-    }
-
-    .btn-primary::before,
-    .btn-secondary::before,
-    .nav-chip::before {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(120deg, transparent 0%, rgba(255, 255, 255, 0.2) 48%, transparent 100%);
-        transform: translateX(-130%);
-        transition: transform 600ms var(--motion-ease-premium);
-        pointer-events: none;
-    }
-
-    .btn-primary:hover,
-    .btn-secondary:hover,
-    .nav-chip:hover {
-        transform: translateY(-2px) scale(1.02);
-    }
-
-    .btn-primary:hover::before,
-    .btn-secondary:hover::before,
-    .nav-chip:hover::before {
-        transform: translateX(130%);
-    }
-
-    .btn-primary:active,
-    .btn-secondary:active,
-    .nav-chip:active {
-        transform: translateY(0) scale(0.985);
-    }
-
-    .metric-card,
-    .glass-card {
-        transition: transform 320ms var(--motion-ease-premium), box-shadow 320ms var(--motion-ease-premium);
-    }
-
-    .metric-card:hover,
-    .glass-card:hover {
-        transform: translateY(-3px);
-    }
-
-    /* Transition d'image elegante et stable */
-    .carousel-enter {
-        transition: opacity 700ms cubic-bezier(0.22, 1, 0.36, 1), transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
-    }
-
-    .carousel-leave {
-        transition: opacity 550ms cubic-bezier(0.4, 0, 0.2, 1), transform 550ms cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .carousel-enter-start {
-        opacity: 0;
-        transform: scale(1.035);
-    }
-
-    .carousel-enter-end {
-        opacity: 1;
-        transform: scale(1);
-    }
-
-    .carousel-leave-start {
-        opacity: 1;
-        transform: scale(1);
-    }
-
-    .carousel-leave-end {
-        opacity: 0;
-        transform: scale(0.985);
-    }
-
-    .carousel-dot {
-        border: none;
-        width: 0.55rem;
-        height: 0.55rem;
-        border-radius: 999px;
-        background: rgba(255, 255, 255, 0.25);
-        transition: all 300ms cubic-bezier(0.16, 1, 0.3, 1);
-        cursor: pointer;
-    }
-
-    .carousel-dot:hover {
-        background: rgba(255, 255, 255, 0.6);
-    }
-
-    .carousel-dot.is-active {
-        width: 1.75rem;
-        background: #fff;
-        box-shadow: 0 0 12px rgba(255, 255, 255, 0.6);
-    }
-
-    .carousel-stage {
-        height: 460px;
-        border-radius: 20px;
-        overflow: hidden;
-        position: relative;
-        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
-        border: none !important;
-        user-select: none;
-    }
-
-    .carousel-slide {
-        position: absolute;
-        inset: 0;
-        opacity: 0;
-        transform: scale(1.02);
-        transition: opacity 700ms cubic-bezier(0.22, 1, 0.36, 1), transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
-        pointer-events: none;
-        will-change: opacity, transform;
-    }
-
-    .carousel-slide.is-active {
-        opacity: 1;
-        transform: scale(1);
-        pointer-events: auto;
-        z-index: 2;
-    }
-
-    .carousel-slide.is-inactive {
-        opacity: 0;
-        transform: scale(0.985);
-        z-index: 1;
-    }
-
-    /* Amélioration de la fluidité des slides Swiper pour une transition ultra élégante */
-    .swiper-wrapper {
-        transition-timing-function: cubic-bezier(0.25, 1, 0.5, 1) !important;
-    }
-
-    .interactive-video-wrap {
-        display: flex;
-        justify-content: center;
-        margin-top: 1.25rem;
-        background: transparent;
-    }
-
-    .video-panel {
-        background: transparent !important;
-        border: none !important;
-        box-shadow: none !important;
-    }
-
-    .interactive-video {
-        width: min(100%, 360px);
-        aspect-ratio: 9 / 16;
-        display: block;
-        object-fit: cover;
-        border-radius: 1.1rem;
-        background: transparent;
-        border: none;
-        box-shadow: none;
-    }
-
-    @media (min-width: 640px) {
-        .carousel-stage {
-            height: 520px;
-        }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-        .carousel-photo,
-        .btn-primary,
-        .btn-secondary,
-        .nav-chip,
-        .metric-card,
-        .glass-card {
-            transition: none !important;
-            animation: none !important;
-            transform: none !important;
-        }
-
-        .btn-primary::before,
-        .btn-secondary::before,
-        .nav-chip::before {
-            display: none;
-        }
-
-    }
-</style>
-
-<section id="a-propos" class="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
-    <div class="space-y-8">
-        <p class="inline-flex rounded-full border border-white/10 bg-white/6 px-4 py-2 text-xs uppercase tracking-[0.35em] text-white/50">Experience produit moderne et elegante</p>
-        <div class="space-y-5">
-            <h1 class="max-w-4xl text-5xl font-semibold leading-tight sm:text-6xl">Invitations evenementielles haut de gamme, RSVP intelligents et controle d'acces QR en une seule plateforme.</h1>
-            <p class="max-w-2xl text-lg text-white/65">Likita centralise la creation d'evenements, les messages WhatsApp personnalises, la confirmation des invites et le scan d'entree dans une experience SaaS elegante et evolutive.</p>
-        </div>
-        <div class="flex flex-wrap gap-4">
-            <a href="{% url 'accounts:signup' %}" class="btn-primary">Lancer mon espace</a>
-            <a href="{% url 'accounts:login' %}" class="btn-secondary">Se connecter</a>
-        </div>
-        <div class="grid gap-4 sm:grid-cols-3">
-            <div class="metric-card">
-                <p class="text-xs uppercase tracking-[0.25em] text-white/40">WhatsApp</p>
-                <p class="mt-3 text-3xl font-semibold">1 clic</p>
-                <p class="mt-2 text-sm text-white/55">Invitation unique prete a envoyer.</p>
+<!-- Hero -->
+<section id="a-propos" class="lp-hero">
+    <div class="lp-hero__grid">
+        <div>
+            <p class="lp-eyebrow">Plateforme d'invitations événementielles</p>
+            <h1 class="lp-hero__title">Des invitations digitales élégantes, <em>du premier message au scan d'entrée.</em></h1>
+            <p class="lp-hero__lead">Likita réunit la création d'invitations, l'envoi WhatsApp personnalisé, la confirmation des invités et le contrôle d'accès par QR code dans une seule plateforme.</p>
+            <div class="lp-hero__actions">
+                <a href="{% url 'accounts:signup' %}" class="btn-primary">Créer mon espace</a>
+                <a href="#invitations" class="btn-secondary">Voir les invitations</a>
             </div>
-            <div class="metric-card">
-                <p class="text-xs uppercase tracking-[0.25em] text-white/40">RSVP</p>
-                <p class="mt-3 text-3xl font-semibold">Temps reel</p>
-                <p class="mt-2 text-sm text-white/55">Presence, accompagnants et messages.</p>
-            </div>
-            <div class="metric-card">
-                <p class="text-xs uppercase tracking-[0.25em] text-white/40">Scanner</p>
-                <p class="mt-3 text-3xl font-semibold">QR securise</p>
-                <p class="mt-2 text-sm text-white/55">Validation, logs et notifications.</p>
+            <div class="lp-hero__meta">
+                <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5L20 7"/></svg>Mise en place en quelques minutes</span>
+                <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5L20 7"/></svg>Envoi WhatsApp &amp; email</span>
+                <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5L20 7"/></svg>Scanner QR inclus</span>
             </div>
         </div>
-    </div>
 
-    <div class="glass-card overflow-hidden p-6">
-        <div class="rounded-[24px] border border-white/10 bg-black/30 p-5">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-xs uppercase tracking-[0.25em] text-white/35">Apercu du tableau de bord</p>
-                    <h2 class="mt-2 text-2xl font-semibold">Gestion premium des invites</h2>
-                </div>
-                <span class="rounded-full bg-emerald-500/15 px-3 py-1 text-xs text-emerald-300">En direct</span>
+        <div class="lp-hero__visual" aria-hidden="true">
+            <div class="lp-mock">
+                <img src="{% static 'media/invitations/collation-grandre.jpeg' %}" alt="">
             </div>
-            <div class="mt-6 grid gap-4">
-                {% for event in featured_events %}
-                    <div class="rounded-3xl border border-white/10 bg-white/5 p-5">
-                        <div class="flex items-start justify-between gap-4">
-                            <div>
-                                <p class="text-sm text-white/45">{{ event.get_event_type_display }}</p>
-                                <h3 class="mt-1 text-xl font-semibold">{{ event.name }}</h3>
-                                <p class="mt-2 text-sm text-white/55">{{ event.address }}</p>
-                            </div>
-                            <span class="rounded-full border border-white/10 px-3 py-1 text-xs text-white/55">{{ event.event_date }}</span>
-                        </div>
-                    </div>
-                {% empty %}
-                    <div class="rounded-3xl border border-dashed border-white/10 bg-white/4 p-8 text-center text-white/55">Publiez un premier evenement pour voir la vitrine Likita prendre forme.</div>
-                {% endfor %}
+            <div class="lp-chip lp-chip--rsvp">
+                <span class="lp-chip__icon lp-chip__icon--green">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg>
+                </span>
+                <span>
+                    <strong>RSVP confirmé</strong>
+                    <small>Marie K. · 2 accompagnants</small>
+                </span>
+            </div>
+            <div class="lp-chip lp-chip--scan">
+                <span class="lp-chip__icon lp-chip__icon--rose">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V5h4m8 0h4v4M20 15v4h-4M8 19H4v-4M8 9h8v6H8z"/></svg>
+                </span>
+                <span>
+                    <strong>Entrée validée</strong>
+                    <small>Scan QR · 20:14</small>
+                </span>
             </div>
         </div>
     </div>
 </section>
 
-<section id="service-graphique-design" class="mt-14 space-y-6">
-    <div class="glass-card p-6 sm:p-8">
-        <p class="text-xs uppercase tracking-[0.32em] text-white/45">Nos formats d'invitation</p>
-        <h2 class="mt-2 text-3xl font-semibold sm:text-4xl">2 types d'invitation pour tous vos evenements</h2>
-        <p class="mt-3 max-w-3xl text-white/65">Likita realise des invitations electroniques elegantes et des invitations interactives avec animations/video pour une experience plus vivante.</p>
+<div class="lp-divider"></div>
+
+<!-- Features -->
+<section id="fonctionnalites" class="lp-section">
+    <p class="lp-eyebrow">Fonctionnalités</p>
+    <h2 class="lp-title">Tout ce qu'il faut pour gérer vos invités</h2>
+    <p class="lp-lead">De l'invitation à l'accueil le jour J, chaque étape est pensée pour vous faire gagner du temps et rassurer vos invités.</p>
+
+    <div class="lp-features">
+        <article class="lp-feature">
+            <span class="lp-feature__icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8.5 8.5 0 0 1-12.6 7.4L4 21l1.6-4.4A8.5 8.5 0 1 1 21 12Z"/><path d="M9 11.5h.01M12 11.5h.01M15 11.5h.01"/></svg>
+            </span>
+            <h3>Envoi WhatsApp en 1 clic</h3>
+            <p>Chaque invité reçoit un lien unique et personnalisé, prêt à partager par WhatsApp ou par email.</p>
+        </article>
+        <article class="lp-feature">
+            <span class="lp-feature__icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg>
+            </span>
+            <h3>RSVP en temps réel</h3>
+            <p>Présences, accompagnants et messages remontent instantanément dans votre tableau de bord.</p>
+        </article>
+        <article class="lp-feature">
+            <span class="lp-feature__icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V5h4m8 0h4v4M20 15v4h-4M8 19H4v-4M8 9h8v6H8z"/></svg>
+            </span>
+            <h3>Scanner QR sécurisé</h3>
+            <p>Validez les entrées à l'accueil, avec historique des scans et alerte en cas de doublon.</p>
+        </article>
+        <article class="lp-feature">
+            <span class="lp-feature__icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 1.9 4.6L19 9l-4.1 1.4L12 15l-2.9-4.6L5 9l5.1-1.4L12 3Z"/><path d="M19 15l.8 1.8L22 17.5l-2.2.7L19 20l-.8-1.8-2.2-.7 2.2-.7L19 15Z"/></svg>
+            </span>
+            <h3>Design sur mesure</h3>
+            <p>Invitations électroniques ou interactives, réalisées par notre équipe graphique à l'image de votre événement.</p>
+        </article>
     </div>
+</section>
 
-    <section
-        class="invitation-carousel glass-card overflow-hidden p-4 sm:p-5"
-        x-data="{
-            active: 0,
-            timer: null,
-            touchStartX: 0,
-            touchEndX: 0,
-            slides: [
-                {
-                    img: '{% static "media/invitations/collation-grandre.jpeg" %}',
-                    alt: 'Exemple invitation collation de grade',
-                    tag: 'Electronique',
-                    title: 'Collation de grade',
-                    text: 'Design premium, QR code et diffusion rapide par WhatsApp ou email.'
-                },
-                {
-                    img: '{% static "media/invitations/mariage.jpeg" %}',
-                    alt: 'Exemple invitation mariage',
-                    tag: 'Electronique',
-                    title: 'Mariage',
-                    text: 'Papeterie digitale raffinee avec confirmation RSVP integree.'
-                },
-                {
-                    img: '{% static "media/invitations/anniversaire.jpeg" %}',
-                    alt: 'Exemple invitation anniversaire',
-                    tag: 'Electronique',
-                    title: 'Anniversaire',
-                    text: 'Format mobile-first, personnalise et pret a envoyer en quelques clics.'
-                }
-            ],
-            next() {
-                this.active = (this.active + 1) % this.slides.length;
-            },
-            prev() {
-                this.active = (this.active - 1 + this.slides.length) % this.slides.length;
-            },
-            goTo(index) {
-                this.active = index;
-            },
-            onTouchStart(event) {
-                this.touchStartX = event.changedTouches[0].clientX;
-            },
-            onTouchEnd(event) {
-                this.touchEndX = event.changedTouches[0].clientX;
-                const deltaX = this.touchEndX - this.touchStartX;
-                const swipeThreshold = 45;
+<!-- How it works -->
+<section id="comment-ca-marche" class="lp-section lp-section--tight">
+    <p class="lp-eyebrow">Comment ça marche</p>
+    <h2 class="lp-title">Trois étapes, et vos invités sont prêts</h2>
 
-                if (Math.abs(deltaX) < swipeThreshold) {
-                    return;
-                }
+    <div class="lp-steps">
+        <article class="lp-step">
+            <p class="lp-step__num">01</p>
+            <h3>Créez votre événement</h3>
+            <p>Renseignez la date, le lieu et le type d'événement, puis choisissez votre thème visuel.</p>
+        </article>
+        <article class="lp-step">
+            <p class="lp-step__num">02</p>
+            <h3>Importez vos invités</h3>
+            <p>Depuis un fichier ou manuellement. Chaque invité reçoit son invitation et son QR code personnel.</p>
+        </article>
+        <article class="lp-step">
+            <p class="lp-step__num">03</p>
+            <h3>Suivez et accueillez</h3>
+            <p>Les confirmations arrivent en direct. Le jour J, scannez les QR codes à l'entrée.</p>
+        </article>
+    </div>
+</section>
 
-                if (deltaX < 0) {
-                    this.next();
-                } else {
-                    this.prev();
-                }
+<div class="lp-divider"></div>
+
+<!-- Showcase: electronic invitations -->
+<section
+    id="invitations"
+    class="lp-section"
+    x-data="{
+        active: 0,
+        timer: null,
+        touchStartX: 0,
+        slides: [
+            {
+                img: '{% static "media/invitations/collation-grandre.jpeg" %}',
+                alt: 'Exemple d\'invitation de mariage, thème champêtre',
+                tag: 'Électronique',
+                title: 'Mariage',
+                text: 'Papeterie digitale raffinée avec confirmation RSVP intégrée.'
             },
-            start() {
-                this.stop();
-                this.timer = setInterval(() => this.next(), 5000);
+            {
+                img: '{% static "media/invitations/mariage.jpeg" %}',
+                alt: 'Exemple d\'invitation de collation de grade',
+                tag: 'Électronique',
+                title: 'Collation de grade',
+                text: 'Design premium, QR code et diffusion rapide par WhatsApp ou email.'
             },
-            stop() {
-                if (this.timer) {
-                    clearInterval(this.timer);
-                    this.timer = null;
-                }
+            {
+                img: '{% static "media/invitations/anniversaire.jpeg" %}',
+                alt: 'Exemple d\'invitation de mariage, thème noir et or',
+                tag: 'Électronique',
+                title: 'Cérémonie noir & or',
+                text: 'Thème sombre et doré, personnalisé et prêt à envoyer en quelques clics.'
             }
-        }"
-        x-init="start()"
-        @mouseenter="stop()"
-        @mouseleave="start()"
-    >
-        <div
-            class="carousel-stage relative overflow-hidden border border-white/10 bg-black/25"
-            @touchstart.passive="onTouchStart($event)"
-            @touchend.passive="onTouchEnd($event)"
-        >
-            <template x-for="(slide, index) in slides" :key="slide.img">
-                <article
-                    class="carousel-slide"
-                    :class="active === index ? 'is-active' : 'is-inactive'"
-                >
-                    <img :src="slide.img" :alt="slide.alt" class="carousel-photo">
+        ],
+        next() { this.active = (this.active + 1) % this.slides.length; },
+        prev() { this.active = (this.active - 1 + this.slides.length) % this.slides.length; },
+        goTo(index) { this.active = index; this.start(); },
+        onTouchStart(event) { this.touchStartX = event.changedTouches[0].clientX; },
+        onTouchEnd(event) {
+            const deltaX = event.changedTouches[0].clientX - this.touchStartX;
+            if (Math.abs(deltaX) < 45) return;
+            deltaX < 0 ? this.next() : this.prev();
+        },
+        start() { this.stop(); this.timer = setInterval(() => this.next(), 5000); },
+        stop() { if (this.timer) { clearInterval(this.timer); this.timer = null; } }
+    }"
+    x-init="start()"
+>
+    <div class="lp-showcase">
+        <div id="service-graphique-design">
+            <p class="lp-eyebrow">Invitations électroniques</p>
+            <h2 class="lp-title">Une invitation à l'image de votre événement</h2>
+            <p class="lp-lead">Nos graphistes conçoivent chaque invitation sur mesure. Elle intègre le QR code de l'invité et un lien de confirmation, le tout prêt à être envoyé.</p>
 
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/82 via-black/35 to-transparent"></div>
-
-                    <div class="absolute inset-x-0 bottom-0 p-5 sm:p-7">
-                        <p class="inline-flex rounded-full border border-white/20 bg-black/35 px-3 py-1 text-xs uppercase tracking-[0.22em] text-white/85" x-text="slide.tag"></p>
-                        <h3 class="mt-3 text-2xl font-semibold text-white sm:text-3xl" x-text="slide.title"></h3>
-                        <p class="mt-2 max-w-2xl text-sm text-white/80 sm:text-base" x-text="slide.text"></p>
-                    </div>
-                </article>
-            </template>
-
-            <button type="button" class="carousel-click-zone carousel-click-zone-left" @click="prev()" aria-label="Precedent"></button>
-            <button type="button" class="carousel-click-zone carousel-click-zone-right" @click="next()" aria-label="Suivant"></button>
-
-        </div>
-
-        <div class="mt-4 flex items-center justify-center gap-2">
-            <template x-for="(slide, index) in slides" :key="`dot-${index}`">
-                <button
-                    type="button"
-                    class="carousel-dot"
-                    :class="active === index ? 'is-active' : ''"
-                    @click="goTo(index)"
-                    :aria-label="`Aller a l'image ${index + 1}`"
-                ></button>
-            </template>
-        </div>
-    </section>
-
-    <article id="service-invitation" class="video-panel overflow-hidden p-5 sm:p-6">
-        <div class="flex flex-wrap items-center justify-between gap-3">
-            <div>
-                <p class="text-xs uppercase tracking-[0.32em] text-white/45">Invitation interactive</p>
-                <h3 class="mt-1 text-2xl font-semibold">Apercu video interactif</h3>
+            <div class="lp-showcase__list" role="tablist" aria-label="Exemples d'invitations">
+                <template x-for="(slide, index) in slides" :key="`item-${index}`">
+                    <button
+                        type="button"
+                        role="tab"
+                        class="lp-showcase__item"
+                        :class="active === index ? 'is-active' : ''"
+                        :aria-selected="(active === index).toString()"
+                        @click="goTo(index)"
+                    >
+                        <span class="lp-showcase__item-num" x-text="String(index + 1).padStart(2, '0')"></span>
+                        <span>
+                            <strong x-text="slide.title"></strong>
+                            <span x-text="slide.text"></span>
+                        </span>
+                    </button>
+                </template>
             </div>
-            <span class="rounded-full border border-emerald-300/25 bg-emerald-400/12 px-3 py-1 text-xs text-emerald-200">Mode interactif</span>
         </div>
-        <div class="interactive-video-wrap">
-            <video controls preload="metadata" playsinline class="interactive-video">
-                <source src="{% static 'media/invitations/invitation-interactive.mp4' %}" type="video/mp4">
-                Votre navigateur ne supporte pas la lecture video.
-            </video>
+
+        <div class="lp-showcase__media">
+            <div class="lp-carousel" @mouseenter="stop()" @mouseleave="start()">
+                <div class="lp-carousel__stage" @touchstart.passive="onTouchStart($event)" @touchend.passive="onTouchEnd($event)">
+                    <template x-for="(slide, index) in slides" :key="slide.img">
+                        <article class="lp-carousel__slide" :class="active === index ? 'is-active' : ''">
+                            <img :src="slide.img" :alt="slide.alt" loading="lazy">
+                            <div class="lp-carousel__caption">
+                                <span class="lp-carousel__tag" x-text="slide.tag"></span>
+                                <h3 x-text="slide.title"></h3>
+                            </div>
+                        </article>
+                    </template>
+                    <button type="button" class="lp-carousel__zone lp-carousel__zone--left" @click="prev(); start()" aria-label="Invitation précédente"></button>
+                    <button type="button" class="lp-carousel__zone lp-carousel__zone--right" @click="next(); start()" aria-label="Invitation suivante"></button>
+                </div>
+                <div class="lp-carousel__dots">
+                    <template x-for="(slide, index) in slides" :key="`dot-${index}`">
+                        <button type="button" class="lp-carousel__dot" :class="active === index ? 'is-active' : ''" @click="goTo(index)" :aria-label="`Aller à l'invitation ${index + 1}`"></button>
+                    </template>
+                </div>
+            </div>
         </div>
-    </article>
+    </div>
 </section>
 
+<!-- Showcase: interactive invitation -->
+<section id="service-invitation" class="lp-section lp-section--tight">
+    <div class="lp-showcase lp-showcase--reverse">
+        <div>
+            <p class="lp-eyebrow">Invitation interactive</p>
+            <h2 class="lp-title">Une expérience animée, pensée pour le mobile</h2>
+            <p class="lp-lead">Pour les événements qui méritent plus qu'une image : animations, vidéo et musique s'enchaînent dans une invitation que vos invités découvrent directement depuis leur téléphone.</p>
+            <div class="lp-badges">
+                <span class="lp-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5L20 7"/></svg>Animations &amp; vidéo</span>
+                <span class="lp-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5L20 7"/></svg>Format vertical 9:16</span>
+                <span class="lp-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5L20 7"/></svg>RSVP &amp; QR intégrés</span>
+            </div>
+        </div>
+
+        <div class="lp-showcase__media">
+            <div class="lp-phone">
+                <video controls preload="metadata" playsinline poster="{% static 'media/invitations/interactive-poster.svg' %}">
+                    <source src="{% static 'media/invitations/invitation-interactive.mp4' %}" type="video/mp4">
+                    Votre navigateur ne supporte pas la lecture vidéo.
+                </video>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Final CTA -->
+<section class="lp-section">
+    <div class="lp-cta">
+        <h2>Prêt à envoyer votre première invitation ?</h2>
+        <p>Créez votre espace, importez vos invités et suivez les confirmations en direct. Notre équipe s'occupe du design.</p>
+        <div class="lp-cta__actions">
+            <a href="{% url 'accounts:signup' %}" class="btn-primary">Créer mon espace</a>
+            <a href="mailto:hello@likita.app" class="btn-secondary">Nous contacter</a>
+        </div>
+    </div>
+</section>
 {% endblock %}

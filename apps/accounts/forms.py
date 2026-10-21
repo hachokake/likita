@@ -14,8 +14,14 @@ class StyledFormMixin:
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for field in self.fields.values():
-            css = field.widget.attrs.get('class', '')
-            field.widget.attrs['class'] = f'{self.default_widget_class} {css}'.strip()
+            widget = field.widget
+            if isinstance(widget, (forms.CheckboxInput, forms.RadioSelect, forms.CheckboxSelectMultiple)):
+                continue
+            css = widget.attrs.get('class', '')
+            classes = f'{self.default_widget_class} {css}'
+            if isinstance(widget, forms.ClearableFileInput):
+                classes += ' file-input'
+            widget.attrs['class'] = classes.strip()
 
 
 class SignUpForm(StyledFormMixin, UserCreationForm):
@@ -32,4 +38,11 @@ class SignUpForm(StyledFormMixin, UserCreationForm):
 
 
 class BosanganiAuthenticationForm(StyledFormMixin, AuthenticationForm):
-    username = forms.EmailField(label='Adresse e-mail')
+    username = forms.EmailField(
+        label='Adresse e-mail',
+        widget=forms.EmailInput(attrs={'autocomplete': 'email', 'placeholder': 'vous@exemple.com'}),
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['password'].widget.attrs.update({'autocomplete': 'current-password', 'placeholder': '••••••••'})

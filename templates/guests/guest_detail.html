@@ -3,58 +3,103 @@
 {% block title %}{{ guest.full_name }} | Likita{% endblock %}
 
 {% block content %}
-<section class="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
-    <div class="glass-card p-8">
-        <p class="text-sm text-white/45">{{ guest.event.name }}</p>
-        <h1 class="mt-2 text-4xl font-semibold">{{ guest.full_name }}</h1>
-        <div class="mt-6 space-y-3 text-sm text-white/60">
-            <p>WhatsApp: {{ guest.whatsapp_number }}</p>
-            <p>Courriel: {{ guest.email|default:'-' }}</p>
-            <p>Categorie: {{ guest.get_category_display }}</p>
-            <p>Accompagnants: {{ guest.allowed_companions }}</p>
-            <p>Table: {{ guest.reserved_table|default:'-' }}</p>
+<section class="page">
+    <div class="page-head">
+        <div>
+            <p class="page-head__eyebrow"><a href="{% url 'guests:list' %}">Invités</a><span>/</span><a href="{% url 'guests:list' %}?event={{ guest.event.pk }}">{{ guest.event.name }}</a></p>
+            <div class="mt-1 flex flex-wrap items-center gap-3">
+                <h1 class="!mt-0">{{ guest.full_name }}</h1>
+                <span class="badge">{{ guest.get_category_display }}</span>
+                {% if guest.rsvp %}<span class="badge badge--{{ guest.rsvp.response }}">{{ guest.rsvp.get_response_display }}</span>{% endif %}
+            </div>
+            <p class="page-head__lead">{{ guest.whatsapp_number }}{% if guest.email %} · {{ guest.email }}{% endif %}</p>
         </div>
-        <div class="mt-8 flex gap-3">
+        <div class="page-head__actions">
+            <a href="{% url 'guests:delete' guest.pk %}" class="btn-danger">Supprimer</a>
             <a href="{% url 'guests:edit' guest.pk %}" class="btn-secondary">Modifier</a>
-            <a href="{% url 'guests:delete' guest.pk %}" class="btn-secondary">Supprimer</a>
-            {% if guest.invitation %}<a href="{% url 'invitations:send' guest.invitation.token %}" class="btn-primary">Envoyer</a>{% endif %}
+            {% if guest.invitation %}<a href="{% url 'invitations:send' guest.invitation.token %}" class="btn-primary">Envoyer l'invitation</a>{% endif %}
         </div>
     </div>
-    <div class="space-y-6">
-        <div class="glass-card p-6">
-            <h2 class="text-2xl font-semibold">Invitation</h2>
-            {% if guest.invitation %}
-                <div class="mt-4 text-sm text-white/60 space-y-2">
-                    <p>Token: {{ guest.invitation.token }}</p>
-                    <p>Statut: {{ guest.invitation.get_delivery_status_display }}</p>
-                    <a href="{% url 'invitations:public' guest.invitation.token %}" class="text-rose-300">Ouvrir la page publique</a>
+
+    <div class="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+        <div class="grid gap-6 content-start">
+            <section class="panel">
+                <div class="panel__head"><h2>Informations</h2></div>
+                <div class="panel__body">
+                    <dl class="dl">
+                        <div><dt>Événement</dt><dd><a href="{% url 'events:dashboard' guest.event.slug %}">{{ guest.event.name }}</a></dd></div>
+                        <div><dt>Catégorie</dt><dd>{{ guest.get_category_display }}</dd></div>
+                        <div><dt>WhatsApp</dt><dd>{{ guest.whatsapp_number }}</dd></div>
+                        <div><dt>E-mail</dt><dd>{{ guest.email|default:"—" }}</dd></div>
+                        <div><dt>Accompagnants autorisés</dt><dd>{{ guest.allowed_companions }}</dd></div>
+                        <div><dt>Table</dt><dd>{{ guest.reserved_table|default:"Non attribuée" }}</dd></div>
+                        <div><dt>Statut</dt><dd>{{ guest.get_status_display }}</dd></div>
+                        <div><dt>Arrivée</dt><dd>{{ guest.arrived_at|date:"j M Y, H:i"|default:"—" }}</dd></div>
+                    </dl>
+                    {% if guest.notes %}
+                        <div class="mt-6">
+                            <p class="text-xs font-semibold uppercase tracking-wider text-white/45">Notes</p>
+                            <p class="mt-2 text-sm leading-relaxed text-white/75">{{ guest.notes|linebreaksbr }}</p>
+                        </div>
+                    {% endif %}
                 </div>
-            {% endif %}
+            </section>
+
+            <section class="panel">
+                <div class="panel__head">
+                    <h2>Invitation</h2>
+                    {% if guest.invitation %}<span class="badge badge--{{ guest.invitation.delivery_status }}">{{ guest.invitation.get_delivery_status_display }}</span>{% endif %}
+                </div>
+                <div class="panel__body">
+                    {% if guest.invitation %}
+                        <dl class="dl">
+                            <div class="sm:col-span-2"><dt>Lien public</dt><dd class="break-all"><a href="{% url 'invitations:public' guest.invitation.token %}" target="_blank" rel="noopener noreferrer">{{ request.scheme }}://{{ request.get_host }}{% url 'invitations:public' guest.invitation.token %}</a></dd></div>
+                            <div><dt>Réponse</dt><dd>{{ guest.rsvp.get_response_display|default:"—" }}</dd></div>
+                            <div><dt>Accompagnants confirmés</dt><dd>{{ guest.rsvp.companion_count|default:0 }}</dd></div>
+                        </dl>
+                        <div class="mt-5 flex flex-wrap gap-2">
+                            <a href="{% url 'invitations:send' guest.invitation.token %}" class="btn-sm btn-sm--primary">Envoyer via WhatsApp</a>
+                            <a href="{% url 'invitations:public' guest.invitation.token %}" target="_blank" rel="noopener noreferrer" class="btn-sm btn-sm--ghost">Prévisualiser</a>
+                        </div>
+                    {% else %}
+                        <p class="text-sm text-white/55">Aucune invitation générée pour cet invité.</p>
+                    {% endif %}
+                </div>
+            </section>
         </div>
-        <div class="glass-card p-6">
-            <h2 class="text-2xl font-semibold">RSVP et QR</h2>
-            <div class="mt-4 text-sm text-white/60 space-y-2">
-                <p>Reponse: {{ guest.rsvp.get_response_display }}</p>
-                <p>Accompagnants confirmes: {{ guest.rsvp.companion_count }}</p>
-                <p>QR token: {{ guest.qrcode.token }}</p>
-            </div>
-            {% if guest.qrcode.image %}
-                <img src="{{ guest.qrcode.image.url }}" alt="QR Code" class="mt-5 h-48 w-48 rounded-3xl bg-white p-3">
-                {% if guest.rsvp.response == 'accepted' %}
-                    <div class="mt-5">
-                        {% if whatsapp_cloud_enabled %}
-                            <form method="post" action="{% url 'invitations:send-qr' guest.invitation.token %}">
-                                {% csrf_token %}
-                                <button type="submit" class="btn-primary">Envoyer le QR sur WhatsApp</button>
-                            </form>
-                        {% else %}
-                            <button type="button" id="share-qr-code" data-image-url="{{ guest.qrcode.image.url }}" data-file-name="qr-{{ guest.full_name|slugify }}.png" class="btn-primary">Partager le QR sur WhatsApp</button>
-                            <a id="download-qr-code" href="{{ guest.qrcode.image.url }}" download class="mt-3 inline-flex text-sm font-semibold text-rose-300 hover:text-rose-200">Télécharger le QR code</a>
-                            <p id="share-qr-status" class="mt-3 text-sm text-white/60"></p>
-                        {% endif %}
-                    </div>
-                {% endif %}
-            {% endif %}
+
+        <div class="grid gap-6 content-start">
+            <section class="panel">
+                <div class="panel__head">
+                    <h2>QR code d'accès</h2>
+                    {% if guest.qrcode %}<span class="table__muted">{{ guest.qrcode.scan_count|default:0 }} scan{{ guest.qrcode.scan_count|pluralize }}</span>{% endif %}
+                </div>
+                <div class="panel__body">
+                    {% if guest.qrcode.image %}
+                        <div class="flex flex-col items-start gap-5 sm:flex-row sm:items-center">
+                            <div class="qr-frame"><img src="{{ guest.qrcode.image.url }}" alt="QR code de {{ guest.full_name }}"></div>
+                            <div class="grid gap-3 text-sm">
+                                {% if guest.rsvp.response == 'accepted' %}
+                                    {% if whatsapp_cloud_enabled %}
+                                        <form method="post" action="{% url 'invitations:send-qr' guest.invitation.token %}">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn-primary">Envoyer le QR sur WhatsApp</button>
+                                        </form>
+                                    {% else %}
+                                        <button type="button" id="share-qr-code" data-image-url="{{ guest.qrcode.image.url }}" data-file-name="qr-{{ guest.full_name|slugify }}.png" class="btn-primary">Partager le QR sur WhatsApp</button>
+                                        <p id="share-qr-status" class="text-white/60" aria-live="polite"></p>
+                                    {% endif %}
+                                {% else %}
+                                    <p class="text-white/60">Le QR code pourra être envoyé une fois la présence confirmée par l'invité.</p>
+                                {% endif %}
+                                <a id="download-qr-code" href="{{ guest.qrcode.image.url }}" download class="font-semibold text-rose-300 hover:text-rose-200">Télécharger l'image</a>
+                            </div>
+                        </div>
+                    {% else %}
+                        <p class="text-sm text-white/55">Aucun QR code généré.</p>
+                    {% endif %}
+                </div>
+            </section>
         </div>
     </div>
 </section>
@@ -66,7 +111,7 @@ const shareQrStatus = document.getElementById('share-qr-status');
 
 shareQrButton.addEventListener('click', async () => {
     shareQrButton.disabled = true;
-    shareQrStatus.textContent = 'Préparation du QR code...';
+    shareQrStatus.textContent = 'Préparation du QR code…';
     try {
         const response = await fetch(shareQrButton.dataset.imageUrl);
         if (!response.ok) {
@@ -76,17 +121,13 @@ shareQrButton.addEventListener('click', async () => {
         const file = new File([image], shareQrButton.dataset.fileName, { type: image.type || 'image/png' });
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
             await navigator.share({ files: [file] });
-            shareQrStatus.textContent = 'Sélectionnez WhatsApp pour envoyer uniquement cette image.';
+            shareQrStatus.textContent = 'Sélectionnez WhatsApp pour envoyer cette image.';
         } else {
             downloadQrLink.click();
             shareQrStatus.textContent = 'Le QR code a été téléchargé. Joignez cette image dans WhatsApp.';
         }
     } catch (error) {
-        if (error.name === 'AbortError') {
-            shareQrStatus.textContent = 'Partage annulé.';
-        } else {
-            shareQrStatus.textContent = error.message;
-        }
+        shareQrStatus.textContent = error.name === 'AbortError' ? 'Partage annulé.' : error.message;
     } finally {
         shareQrButton.disabled = false;
     }

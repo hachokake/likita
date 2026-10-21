@@ -1,0 +1,19 @@
+{% comment %}
+Rendu homogène d'un champ de formulaire.
+Usage : {% include 'partials/field.html' with field=form.name full=True %}
+{% endcomment %}
+{% if field.field.widget.input_type == 'checkbox' %}
+<div class="field field--checkbox{% if full %} field--full{% endif %}{% if field.errors %} has-error{% endif %}">
+    {{ field }}
+    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+    {% if field.help_text %}<p class="help">{{ field.help_text|safe }}</p>{% endif %}
+    {{ field.errors }}
+</div>
+{% else %}
+<div class="field{% if full %} field--full{% endif %}{% if field.errors %} has-error{% endif %}">
+    <label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %}<span class="req" aria-hidden="true">*</span>{% endif %}</label>
+    {{ field }}
+    {% if field.help_text %}<div class="help">{{ field.help_text|safe }}</div>{% endif %}
+    {{ field.errors }}
+</div>
+{% endif %}

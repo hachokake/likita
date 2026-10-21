@@ -1,21 +1,40 @@
 {% extends 'base.html' %}
 
-{% block title %}Invite | Likita{% endblock %}
+{% block title %}{% if object %}Modifier{% else %}Ajouter{% endif %} un invité | Likita{% endblock %}
 
 {% block content %}
-<section class="mx-auto max-w-4xl">
-    <div class="glass-card p-8 sm:p-10">
-        <h1 class="text-4xl font-semibold">{% if form.instance.pk %}Modifier{% else %}Ajouter{% endif %} un invite</h1>
-        <form method="post" class="mt-8 grid gap-5 sm:grid-cols-2">
+<section class="page page--narrow">
+    <div class="page-head">
+        <div>
+            <p class="page-head__eyebrow"><a href="{% url 'guests:list' %}">Invités</a><span>/</span><span>{% if object %}Modification{% else %}Ajout{% endif %}</span></p>
+            <h1>{% if object %}Modifier « {{ object.full_name }} »{% else %}Ajouter un invité{% endif %}</h1>
+            <p class="page-head__lead">{% if not object %}Une invitation et un QR code personnels seront générés automatiquement.{% else %}Les modifications sont répercutées sur l'invitation existante.{% endif %}</p>
+        </div>
+    </div>
+
+    <div class="panel">
+        <form method="post" class="panel__body form-grid" novalidate>
             {% csrf_token %}
-            {% for field in form %}
-                <div class="space-y-2 {% if field.name == 'notes' %}sm:col-span-2{% endif %}">
-                    <label class="text-sm text-white/60">{{ field.label }}</label>
-                    {{ field }}
-                    {{ field.errors }}
-                </div>
-            {% endfor %}
-            <button type="submit" class="btn-primary sm:col-span-2">Enregistrer l'invite</button>
+            {% if form.non_field_errors %}
+                <div class="form-errors field--full" role="alert">{{ form.non_field_errors }}</div>
+            {% endif %}
+            {% include 'partials/field.html' with field=form.event full=True %}
+            {% include 'partials/field.html' with field=form.full_name full=True %}
+            {% include 'partials/field.html' with field=form.whatsapp_number %}
+            {% include 'partials/field.html' with field=form.email %}
+            {% include 'partials/field.html' with field=form.category %}
+            {% include 'partials/field.html' with field=form.allowed_companions %}
+            {% include 'partials/field.html' with field=form.reserved_table %}
+            {% include 'partials/field.html' with field=form.notes full=True %}
+            <div class="form-actions">
+                {% if object %}
+                    <a href="{% url 'guests:detail' object.pk %}" class="cancel">Annuler</a>
+                    <button type="submit" class="btn-primary">Enregistrer</button>
+                {% else %}
+                    <a href="{% url 'guests:list' %}" class="cancel">Annuler</a>
+                    <button type="submit" class="btn-primary">Ajouter l'invité</button>
+                {% endif %}
+            </div>
         </form>
     </div>
 </section>

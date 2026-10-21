@@ -3,41 +3,61 @@
 {% block title %}Statistiques | Likita{% endblock %}
 
 {% block content %}
-<section class="space-y-8">
-    <div>
-        <p class="text-xs uppercase tracking-[0.3em] text-white/40">Statistiques</p>
-        <h1 class="mt-2 text-4xl font-semibold">Vue analytique</h1>
+<section class="page">
+    <div class="page-head">
+        <div>
+            <p class="page-head__eyebrow">Statistiques</p>
+            <h1>Vue analytique</h1>
+            <p class="page-head__lead">Performance de chaque événement et historique des contrôles d'entrée.</p>
+        </div>
     </div>
-    <div class="grid gap-6 lg:grid-cols-[1fr_1fr]">
-        <div class="glass-card p-6">
-            <h2 class="text-2xl font-semibold">Performance par evenement</h2>
-            <div class="mt-6 space-y-4">
-                {% for event in events %}
-                    <div class="rounded-3xl border border-white/10 bg-white/5 p-4">
-                        <div class="flex items-center justify-between">
-                            <span>{{ event.name }}</span>
-                            <span class="text-white/45">{{ event.get_status_display }}</span>
-                        </div>
-                        <p class="mt-2 text-sm text-white/55">{{ event.total_guests }} invites</p>
-                    </div>
-                {% empty %}
-                    <p class="text-white/55">Aucune statistique disponible.</p>
-                {% endfor %}
+
+    <div class="grid gap-6 xl:grid-cols-2">
+        <section class="panel">
+            <div class="panel__head"><h2>Par événement</h2></div>
+            {% if events %}
+                <div class="table-wrap">
+                    <table class="table">
+                        <thead><tr><th>Événement</th><th>Statut</th><th class="text-right">Invités</th></tr></thead>
+                        <tbody>
+                            {% for event in events %}
+                            <tr>
+                                <td><a href="{% url 'events:dashboard' event.slug %}" class="table__primary">{{ event.name }}</a><div class="table__muted">{{ event.event_date|date:"j M Y" }}</div></td>
+                                <td><span class="badge badge--{{ event.status }}">{{ event.get_status_display }}</span></td>
+                                <td class="text-right font-semibold">{{ event.total_guests }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="panel__body"><p class="text-sm text-white/55">Aucune statistique disponible pour le moment.</p></div>
+            {% endif %}
+        </section>
+
+        <section class="panel">
+            <div class="panel__head"><h2>Historique des scans</h2><span class="table__muted">20 derniers</span></div>
+            <div class="panel__body">
+                {% if scans %}
+                    <ul class="list">
+                        {% for scan in scans %}
+                            <li class="list-item">
+                                <div>
+                                    <div class="flex flex-wrap items-center gap-2">
+                                        <span class="badge badge--{{ scan.status }}">{{ scan.get_status_display }}</span>
+                                        <strong>{{ scan.guest.full_name|default:"QR non reconnu" }}</strong>
+                                    </div>
+                                    <p>{{ scan.event.name }}</p>
+                                </div>
+                                <time datetime="{{ scan.scanned_at|date:'c' }}">{{ scan.scanned_at|date:"j M, H:i" }}</time>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-sm text-white/55">Aucun scan enregistré.</p>
+                {% endif %}
             </div>
-        </div>
-        <div class="glass-card p-6">
-            <h2 class="text-2xl font-semibold">Historique des scans</h2>
-            <div class="mt-6 space-y-4">
-                {% for scan in scans %}
-                    <div class="rounded-3xl border border-white/10 bg-white/5 p-4">
-                        <p class="font-semibold">{{ scan.guest.full_name|default:'Inconnu' }}</p>
-                        <p class="mt-1 text-sm text-white/55">{{ scan.event.name }} · {{ scan.get_status_display }} · {{ scan.scanned_at }}</p>
-                    </div>
-                {% empty %}
-                    <p class="text-white/55">Aucun scan enregistre.</p>
-                {% endfor %}
-            </div>
-        </div>
+        </section>
     </div>
 </section>
 {% endblock %}
